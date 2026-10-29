@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/health", "destination": "https://portfolio-api-xvmo.onrender.com/api/health" }
+  ]
+}
