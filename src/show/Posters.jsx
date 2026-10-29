@@ -4,9 +4,12 @@ import * as THREE from "three";
 import projects from "../data/projects.json";
 import { C } from "./palette.js";
 
-// The projects hang on the back wall, in two zones: CODE on the left, DESIGN on the right.
+// The projects hang on the back wall. On a laptop: CODE on the left, DESIGN on the right.
+// On a phone the screen is narrow, so CODE sits above DESIGN.
 const WALL_Z = -6.45;
-const ZONES = { code: [-6.0, -2.0], design: [0.0, 4.8] }; // left and right edge of each zone
+const ZONES = { code: [-6.0, -2.0], design: [0.0, 4.8] }; // left and right edge of each zone (laptop)
+const ZONES_PORTRAIT = { code: [-2.4, 2.4], design: [-2.4, 2.4] }; // phone: both zones are as wide as the screen
+const BASE_Y_PORTRAIT = { code: 5.9, design: 3.0 }; // phone: the height of the row of posters in each zone
 const TITLES = { code: "CODE", design: "DESIGN" };
 
 const smooth = THREE.MathUtils.smoothstep;
@@ -17,8 +20,9 @@ function visibility(p) {
 }
 
 /* How one side of the wall is laid out, by how many posters it shows:
-   1-2 large in a row, 3-4 medium (2 by 2), 5-6 small (3 by 2). */
-function layout(count, zone) {
+   1-2 large in a row, 3-4 medium (2 by 2), 5-6 small (3 by 2).
+   baseYOverride is given on a phone, where each zone has its own height. */
+function layout(count, zone, baseYOverride) {
   const [z0, z1] = zone;
   const zw = z1 - z0;
   const zc = (z0 + z1) / 2;
@@ -49,7 +53,7 @@ function layout(count, zone) {
   const h = w * 0.64;
   const rows = Math.ceil(count / cols);
   const pitch = h + gapY;
-  const baseY = rows > 1 ? 2.95 : 3.0;
+  const baseY = baseYOverride !== undefined ? baseYOverride : rows > 1 ? 2.95 : 3.0;
   const items = [];
   for (let i = 0; i < count; i++) {
     const row = Math.floor(i / cols);
@@ -60,7 +64,9 @@ function layout(count, zone) {
       y: baseY + ((rows - 1) / 2 - row) * pitch,
     });
   }
-  return { w, h, items, signY: rows > 1 ? 4.85 : 4.4 };
+  const top = baseY + ((rows - 1) / 2) * pitch + h / 2 + 0.07;
+  const signY = baseYOverride !== undefined ? top + 0.55 : rows > 1 ? 4.85 : 4.4;
+  return { w, h, items, signY };
 }
 
 /* A texture drawn with the logo's font. It is made once the font has loaded. */
@@ -258,6 +264,8 @@ function Picker({ pickRef }) {
 }
 
 export default function Posters({ progressRef, work }) {
+  const size = useThree((s) => s.size);
+  const portrait = size.width / size.height < 0.9;
   const perPage = work.perPage || 6;
   const page = work.page || 0;
 
@@ -273,10 +281,11 @@ export default function Posters({ progressRef, work }) {
     <group>
       <Picker pickRef={work.pickRef} />
       {Object.entries(groups).map(([cat, all]) => {
-        const zone = ZONES[cat] || [-3, 3];
+        const zone = (portrait ? ZONES_PORTRAIT[cat] : ZONES[cat]) || [-3, 3];
+        const baseY = portrait ? (BASE_Y_PORTRAIT[cat] !== undefined ? BASE_Y_PORTRAIT[cat] : 4) : undefined;
         const list = all.slice(page * perPage, page * perPage + perPage);
         if (list.length === 0) return null;
-        const lay = layout(list.length, zone);
+        const lay = layout(list.length, zone, baseY);
         const dimZone = !!work.category && work.category !== cat;
         return (
           <group key={cat}>

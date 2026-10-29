@@ -16,6 +16,10 @@ const FOV = 38;
 // Where the camera stands, and what it looks at, for each act.
 // In front of the closed curtain: high enough to see the whole curtain and the beam above it.
 const CURTAIN_POSE = { pos: [0, 2.7, 11.8], look: [0, 3.2, 0] };
+// On a phone the screen is tall and narrow, so the camera stands further back:
+// the whole curtain and the whole sign fit in the picture.
+const CURTAIN_POSE_PORTRAIT = { pos: [0, 3.2, 17], look: [0, 3.2, 0] };
+
 const POSES = [
   { pos: [1.2, 1.6, 4.6], look: [0.0, 1.4, -1.8] }, // 0 Home: me and the microphone
   { pos: [0.8, 1.7, 3.0], look: [-0.6, 2.2, -4.0] }, // 1 Work: the back wall
@@ -23,10 +27,10 @@ const POSES = [
   { pos: [0.5, 1.45, 2.7], look: [-0.9, 1.35, -1.8] }, // 3 Contact: close to the microphone
 ];
 const POSES_PORTRAIT = [
-  { pos: [0.4, 1.9, 8.2], look: [0.0, 1.2, -1.8] },
-  { pos: [0.4, 2.2, 5.8], look: [-0.6, 2.4, -4.0] },
-  { pos: [-1.6, 1.7, 5.0], look: [-1.3, 1.3, -1.8] },
-  { pos: [0.2, 1.6, 5.0], look: [-0.9, 1.3, -1.8] },
+  { pos: [-0.9, 2.2, 8.1], look: [-0.95, 3.0, -1.8] }, // 0 Home: I stand in the lower half, under the speech bubble
+  { pos: [0, 3.6, 7.0], look: [0, 3.6, -6.45] }, // 1 Work: the whole wall, CODE above DESIGN
+  { pos: [-1.6, 1.7, 5.0], look: [-1.3, 1.3, -1.8] }, // 2 About
+  { pos: [0.2, 1.6, 5.0], look: [-0.9, 1.3, -1.8] }, // 3 Contact
 ];
 // -------------------------------------------------------------------------------
 
@@ -58,14 +62,15 @@ function CameraRig({ anim, progressRef, reduced }) {
   const { camera, size } = useThree();
   const pos = useMemo(() => new THREE.Vector3(...CURTAIN_POSE.pos), []);
   const look = useMemo(() => new THREE.Vector3(...CURTAIN_POSE.look), []);
-  const cp = useMemo(() => new THREE.Vector3(...CURTAIN_POSE.pos), []);
-  const cl = useMemo(() => new THREE.Vector3(...CURTAIN_POSE.look), []);
+  const cp = useMemo(() => new THREE.Vector3(), []);
+  const cl = useMemo(() => new THREE.Vector3(), []);
   const tp = useMemo(() => new THREE.Vector3(), []);
   const tl = useMemo(() => new THREE.Vector3(), []);
   const a = useMemo(() => new THREE.Vector3(), []);
   const b = useMemo(() => new THREE.Vector3(), []);
   const tmp = useMemo(() => new THREE.Vector3(), []);
   const mouse = useRef({ x: 0, y: 0 });
+  const first = useRef(true);
 
   // A small parallax with the mouse: the scene has depth. Not on touch screens, not with reduced motion.
   useEffect(() => {
@@ -81,7 +86,12 @@ function CameraRig({ anim, progressRef, reduced }) {
   }, [reduced]);
 
   useFrame((state, dt) => {
-    const poses = size.width / size.height < 0.9 ? POSES_PORTRAIT : POSES;
+    const portrait = size.width / size.height < 0.9;
+    const poses = portrait ? POSES_PORTRAIT : POSES;
+    const cpose = portrait ? CURTAIN_POSE_PORTRAIT : CURTAIN_POSE;
+    cp.set(...cpose.pos);
+    cl.set(...cpose.look);
+
     const p = THREE.MathUtils.clamp(progressRef.current, 0, poses.length - 1);
     const i = Math.min(Math.floor(p), poses.length - 2);
     const f = p - i;
@@ -110,6 +120,13 @@ function CameraRig({ anim, progressRef, reduced }) {
       const t = state.clock.elapsedTime;
       tp.x += Math.sin(t * 0.35) * 0.1;
       tp.y += Math.sin(t * 0.27) * 0.04;
+    }
+
+    // the first frame starts exactly where the camera should be: no glide from a wrong place
+    if (first.current) {
+      pos.copy(tp);
+      look.copy(tl);
+      first.current = false;
     }
 
     const k = reduced ? 1 : 1 - Math.exp(-dt * 3);

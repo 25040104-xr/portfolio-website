@@ -50,6 +50,7 @@
 
 /* ----- The prompt: it arrives after the stage is lit, and rings spread out of it, which says "tap here" ----- */
 .show-prompt {
+  white-space: nowrap; /* one line, also on a narrow phone */
   animation:
     prompt-in 0.9s ease 0.5s backwards,
     pulse 2.2s ease-in-out 1.5s infinite;
@@ -89,13 +90,13 @@
   left: 50%;
   bottom: 3vh;
   z-index: 3;
-  padding: 8px 14px;
+  padding: 9px 18px;
   border: 0;
-  background: none;
-  color: rgba(255, 251, 245, 0.85);
+  border-radius: 999px;
+  background: rgba(8, 16, 36, 0.62); /* a dark base, so it can be read on the light floor too */
+  color: var(--cream);
   font: 600 14px / 1 var(--body);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  white-space: nowrap;
   cursor: pointer;
   transform: translateX(-50%);
   animation: prompt-in 0.9s ease 0.9s backwards;
@@ -138,11 +139,36 @@
   }
 }
 
-/* ----- Tall, narrow screens (phones): the sign is bigger, so the tagline sits lower ----- */
+/* ----- Tall, narrow screens (phones) ----- */
 @media (max-aspect-ratio: 9/10) {
+  /* the sign takes the middle of the picture, so the tagline sits below it */
   .show-tagline {
     top: 66%;
-    font-size: clamp(28px, 8vw, 46px);
+    font-size: clamp(26px, 7.4vw, 44px);
+  }
+
+  .show-prompt {
+    bottom: 9vh;
+    padding: 13px 26px;
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 760px) {
+  /* About: the number goes above its words, so "2025–2028" fits on one line */
+  .show .facts li {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+
+  .show .facts b {
+    grid-row: auto;
+    font-size: 28px;
+  }
+
+  /* the scroll cue stays below the panels */
+  .show .cue {
+    bottom: 1.8vh;
   }
 }
 
