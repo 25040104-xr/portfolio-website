@@ -36,30 +36,27 @@ function tooMany(ip) {
   return false;
 }
 
-/* Every message is also sent to my own email, so it is never lost
+/* Every message is also sent to my phone through a Telegram bot, so it is never lost
    (a free host can wipe the database file when it restarts).
-   It needs two settings on the host: RESEND_API_KEY and MAIL_TO.
+   It needs two settings on the host: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.
    Without them (for example on my own computer) this does nothing. */
 async function notify(name, email, message) {
-  const key = process.env.RESEND_API_KEY;
-  const to = process.env.MAIL_TO;
-  if (!key || !to) return;
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chat = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chat) return;
   try {
-    const res = await fetch("https://api.resend.com/emails", {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "Portfolio <onboarding@resend.dev>",
-        to: [to],
-        reply_to: email,
-        subject: `New message from ${name.replace(/[\r\n]+/g, " ")} (portfolio)`,
-        text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+        chat_id: chat,
+        text: `New portfolio message\n\nName: ${name}\nEmail: ${email}\n\n${message}`,
       }),
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) console.error("Email failed:", res.status, await res.text());
+    if (!res.ok) console.error("Notification failed:", res.status, await res.text());
   } catch (err) {
-    console.error("Email failed:", err.message);
+    console.error("Notification failed:", err.message);
   }
 }
 
