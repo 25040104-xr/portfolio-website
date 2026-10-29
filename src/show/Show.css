@@ -1,0 +1,862 @@
+/* ===== The show: the words and buttons that sit on top of the 3D stage ===== */
+.show {
+  --cream: #fffbf5;
+  --cobalt: #2a58b0;
+  --navy: #172a52;
+  --sky: #7ba0bf;
+  --haze: #d0d0c8;
+  --yellow: #e8c14a;
+  --display: "Londrina Solid", "Arial Rounded MT Bold", Impact, sans-serif; /* the logo's font */
+  --body: "DM Sans", system-ui, sans-serif; /* the font of "Tap the curtain to begin" */
+  --work-left: 30vw; /* how far from the left the Work panel starts: keeps me visible */
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--navy);
+  color: var(--cream);
+  font-family: var(--body);
+}
+
+.show .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.show-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.show-canvas > div {
+  position: absolute;
+  inset: 0;
+}
+
+/* ----- The sign above the curtain ----- */
+.show-sign {
+  position: absolute;
+  top: 3vh;
+  left: 50%;
+  z-index: 3;
+  padding: 10px 30px 8px;
+  border: 3px solid var(--yellow);
+  border-radius: 10px;
+  background: #0a1428;
+  color: var(--cream);
+  font: 900 clamp(20px, 3vw, 36px) / 1.1 var(--display);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  box-shadow:
+    0 0 0 4px #0a1428,
+    0 14px 34px rgba(0, 0, 0, 0.55);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  pointer-events: none;
+}
+
+/* the lit bulbs along the top and bottom of the sign */
+.show-sign::before,
+.show-sign::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 8px;
+  background: radial-gradient(circle, var(--yellow) 0 3px, transparent 4px) 0 0 / 18px 100% repeat-x;
+  animation: bulbs 2.4s ease-in-out infinite;
+}
+
+.show-sign::before {
+  top: -15px;
+}
+
+.show-sign::after {
+  bottom: -15px;
+}
+
+.show-sign.gone {
+  opacity: 0;
+  transform: translate(-50%, -60px);
+}
+
+@keyframes bulbs {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ----- The prompt: the one thing to do ----- */
+.show-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 9vh;
+  z-index: 3;
+  padding: 14px 30px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--navy);
+  font: 700 18px / 1 var(--body);
+  cursor: pointer;
+  transform: translateX(-50%);
+  box-shadow:
+    0 4px 0 rgba(23, 42, 82, 0.35),
+    0 16px 34px rgba(0, 0, 0, 0.5);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+.show-prompt:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 4px;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+/* ----- The top bar, once the show has begun ----- */
+.show-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px clamp(16px, 4vw, 40px);
+  background: linear-gradient(rgba(10, 20, 40, 0.75), rgba(10, 20, 40, 0));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease 1.2s;
+}
+
+.show-nav.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.show-nav button {
+  border: 0;
+  background: none;
+  color: var(--cream);
+  font: 600 15px / 1 var(--body);
+  cursor: pointer;
+}
+
+.show-nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.show-nav .brand span {
+  font-weight: 700;
+}
+
+.show-nav nav {
+  display: flex;
+  gap: clamp(14px, 3vw, 30px);
+}
+
+.show-nav nav button {
+  padding: 6px 2px;
+  border-bottom: 3px solid transparent;
+  color: rgba(255, 251, 245, 0.7);
+}
+
+.show-nav nav button.on {
+  border-bottom-color: var(--yellow);
+  color: var(--cream);
+}
+
+.show-nav button:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+
+/* ----- The acts: one screen each. Scrolling is native, and it snaps. ----- */
+.show-scroll {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.show-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.show-scroll.on {
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.act {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  scroll-snap-align: start;
+}
+
+/* ----- The panels: my speech bubble, and the paper the rest is written on ----- */
+.panel {
+  position: absolute;
+  padding: 26px 28px 24px;
+  border-radius: 24px;
+  background: var(--cream);
+  color: var(--navy);
+  visibility: hidden;
+  opacity: 0;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 26px 50px rgba(5, 12, 30, 0.5),
+    0 8px 16px rgba(5, 12, 30, 0.35);
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 1.2, 0.3, 1), visibility 0s linear 0.5s;
+}
+
+.panel.in {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+
+/* beside me, on the right */
+.panel.side {
+  top: 50%;
+  right: 7vw;
+  width: min(460px, calc(100vw - 40px));
+  transform: translateY(-46%) scale(0.94);
+  transform-origin: 0% 60%;
+}
+
+.panel.side.in {
+  transform: translateY(-50%) scale(1);
+}
+
+/* Work: along the bottom, so the posters on the wall stay in view */
+.panel.work {
+  left: var(--work-left);
+  right: 4vw;
+  bottom: 13vh;
+  transform: translateY(24px) scale(0.96);
+  transform-origin: 50% 100%;
+}
+
+.panel.work.in {
+  transform: none;
+}
+
+/* the tail of my bubble points at me */
+.panel.tail::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 58%;
+  border-style: solid;
+  border-width: 12px 16px 12px 0;
+  border-color: transparent var(--cream) transparent transparent;
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  color: var(--cobalt);
+  font: 900 clamp(34px, 4vw, 50px) / 0.98 var(--display);
+  letter-spacing: 0.01em;
+}
+
+.panel p {
+  margin: 0 0 10px;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.panel .lead {
+  font-size: 19px;
+  font-weight: 600;
+}
+
+/* ----- Buttons: they tell the visitor what they can do next ----- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 18px;
+  border: 2px solid var(--cobalt);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cobalt);
+  font: 700 15px / 1 var(--body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chip.fill {
+  background: var(--cobalt);
+  color: var(--cream);
+}
+
+.chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(42, 88, 176, 0.25);
+}
+
+.chip:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.chip:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.chip:focus-visible,
+.cat:focus-visible,
+.prow:focus-visible {
+  outline: 3px solid var(--navy);
+  outline-offset: 3px;
+}
+
+/* ----- Work: the two sides, and the project list ----- */
+.cats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.cat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 0;
+  border-radius: 18px;
+  color: var(--cream);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(23, 42, 82, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cat-code {
+  background: var(--navy);
+}
+
+.cat-design {
+  background: var(--cobalt);
+}
+
+.cat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 rgba(23, 42, 82, 0.3);
+}
+
+.cat:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(23, 42, 82, 0.3);
+}
+
+.cat-title {
+  font: 900 clamp(34px, 4vw, 48px) / 1 var(--display);
+}
+
+.cat-line {
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.cat-n {
+  margin-top: auto;
+  color: var(--yellow);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.plist {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prow {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 14px 10px 10px;
+  border: 2px solid rgba(23, 42, 82, 0.14);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--navy);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.prow:hover {
+  transform: translateX(4px);
+  border-color: var(--cobalt);
+}
+
+.prow img,
+.prow .ph {
+  width: 96px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--sky);
+}
+
+.ptext strong {
+  display: block;
+  color: var(--cobalt);
+  font: 900 26px / 1.02 var(--display);
+}
+
+.ptext em {
+  display: block;
+  font-size: 13px;
+  font-style: normal;
+  opacity: 0.85;
+}
+
+.ptext small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.prow b {
+  color: var(--cobalt);
+  font-size: 22px;
+}
+
+/* ----- About ----- */
+.facts {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.facts li {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 0 14px;
+  align-items: baseline;
+}
+
+.facts b {
+  grid-row: span 2;
+  color: var(--cobalt);
+  font: 900 30px / 1 var(--display);
+}
+
+.facts span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+
+.facts p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.skill-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+
+.skill-row span {
+  color: var(--cobalt);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.skill-row p {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* ----- Contact: the form is written on the paper ----- */
+.field {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.field span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid rgba(23, 42, 82, 0.25);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--navy);
+  font: 400 16px / 1.4 var(--body);
+}
+
+.field input:focus-visible,
+.field textarea:focus-visible {
+  outline: none;
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px rgba(42, 88, 176, 0.25);
+}
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.msg {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--yellow);
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ----- The cue to scroll: where, and to what ----- */
+.cue {
+  position: absolute;
+  left: 50%;
+  bottom: 4vh;
+  padding: 11px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--navy);
+  color: var(--yellow);
+  font: 700 14px / 1 var(--body);
+  cursor: pointer;
+  transform: translateX(-50%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  animation: bob 2s ease-in-out infinite;
+}
+
+.cue:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 4px;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 5px);
+  }
+}
+
+/* ----- A case study, opened as a large sheet of paper ----- */
+.case {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  background: rgba(8, 16, 36, 0.84);
+  animation: fadein 0.25s ease;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+}
+
+.case-box {
+  position: relative;
+  width: min(980px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: clamp(22px, 4vw, 44px);
+  border-radius: 24px;
+  background: var(--cream);
+  color: var(--navy);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+}
+
+.case-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 2;
+  padding: 9px 16px;
+  border: 2px solid var(--navy);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--navy);
+  font: 700 14px / 1 var(--body);
+  cursor: pointer;
+}
+
+.case-close:focus-visible,
+.case-next:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 3px;
+}
+
+.case-kicker {
+  margin: 0 0 6px;
+  color: var(--cobalt);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.case-box h2 {
+  margin: 0 0 8px;
+  color: var(--cobalt);
+  font: 900 clamp(38px, 5vw, 64px) / 0.98 var(--display);
+}
+
+.case-box h3 {
+  margin: 26px 0 8px;
+  font: 900 28px / 1 var(--display);
+}
+
+.case-lead {
+  max-width: 62ch;
+  margin: 0 0 14px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.case-box p,
+.case-box li {
+  max-width: 68ch;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.case-box ol,
+.case-box ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.case-box a {
+  color: var(--cobalt);
+  font-weight: 700;
+}
+
+.case-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 36px;
+  margin: 0 0 8px;
+}
+
+.case-meta dt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  opacity: 0.65;
+}
+
+.case-meta dd {
+  margin: 2px 0 0;
+  font-size: 15px;
+}
+
+.case-screens {
+  display: flex;
+  gap: 16px;
+  margin: 18px 0 0;
+  padding-bottom: 10px;
+  overflow-x: auto;
+}
+
+.case-screens figure {
+  flex: 0 0 auto;
+  width: min(100%, 420px);
+  margin: 0;
+}
+
+.case-screens img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(23, 42, 82, 0.3);
+}
+
+.case-screens figcaption {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
+.case-next {
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  padding: 16px 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--navy);
+  color: var(--yellow);
+  font: 700 16px / 1 var(--body);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ----- No 3D on this device ----- */
+.show-fallback {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  padding: 8vw;
+  background: #172a52;
+  color: #fffbf5;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.show-fallback h1 {
+  margin: 0 0 8px;
+  font: 900 clamp(44px, 8vw, 80px) / 1 "Londrina Solid", Impact, sans-serif;
+}
+
+.show-fallback a {
+  color: #e8c14a;
+}
+
+/* ----- Phones ----- */
+@media (max-width: 760px) {
+  .show-sign {
+    padding: 8px 14px 6px;
+    font-size: 17px;
+  }
+
+  .show-nav .brand span {
+    display: none;
+  }
+
+  .panel {
+    padding: 20px 20px 18px;
+  }
+
+  .panel.side {
+    top: 13vh;
+    right: 4vw;
+    left: 4vw;
+    width: auto;
+    transform: translateY(0) scale(0.94);
+    transform-origin: 50% 0%;
+  }
+
+  .panel.side.in {
+    transform: translateY(0) scale(1);
+  }
+
+  .panel.tail::before {
+    display: none;
+  }
+
+  .panel.work {
+    left: 4vw;
+    right: 4vw;
+    bottom: 11vh;
+    max-height: 52vh;
+    overflow: auto;
+  }
+
+  .panel p {
+    font-size: 15px;
+  }
+
+  .cats {
+    grid-template-columns: 1fr;
+  }
+
+  .cat {
+    padding: 14px 16px;
+  }
+
+  .prow {
+    grid-template-columns: 72px 1fr auto;
+  }
+
+  .prow img,
+  .prow .ph {
+    width: 72px;
+    height: 48px;
+  }
+}
+
+/* ----- Reduced motion: nothing pulses, bobs or springs ----- */
+@media (prefers-reduced-motion: reduce) {
+  .show-sign::before,
+  .show-sign::after,
+  .show-prompt,
+  .cue,
+  .case {
+    animation: none;
+  }
+
+  .show-sign,
+  .show-nav,
+  .panel,
+  .chip,
+  .cat,
+  .prow {
+    transition: none;
+  }
+}

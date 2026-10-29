@@ -1,0 +1,10 @@
+{
+  "name": "YourName ",
+  "tagline": "IT student · code first, design-minded",
+  "intro": "I'm a full stack IT student who enjoys building things that work and feel good to use. I work mostly with React, Node and Python.",
+  "about": "这里写更长的一段自我介绍：你在读什么、对什么感兴趣、想做什么方向。",
+  "email": "xinruikhoo5@gmail.com",
+  "github": "https://github.com/25040104-xr",
+  "linkedin": "https://www.linkedin.com/in/khoo-xin-rui-965091366/",
+  "skills": ["React", "Node.js", "Express", "Python", "SQLite", "Git", "Figma"]
+}

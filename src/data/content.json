@@ -1,0 +1,67 @@
+{
+  "intro": "I am an Information Technology student at Republic Polytechnic. I build web applications and design digital campaigns, and I am looking for an internship starting in mid-March.",
+  "resume": "",
+  "workLead": "Each project is presented as a case study: the problem, my process and the result. Choose a category to begin.",
+  "categories": {
+    "code": {
+      "title": "Code",
+      "line": "Applications, APIs and databases."
+    },
+    "design": {
+      "title": "Design",
+      "line": "Interfaces, layouts and branding."
+    }
+  },
+  "stack": {
+    "stage": [
+      { "name": "HTML", "note": "The structure of web pages." },
+      { "name": "CSS", "note": "Layout and styling." },
+      { "name": "JavaScript", "note": "Interactivity: buttons, forms and page updates." },
+      { "name": "Bootstrap", "note": "A front-end framework for responsive layouts." }
+    ],
+    "design": [
+      {
+        "name": "UI/UX design",
+        "note": "Visual hierarchy, layouts and calls to action in the Nature Network 2030 website and the Grow Green email newsletter."
+      },
+      { "name": "Figma", "note": "Interface design and prototyping." },
+      {
+        "name": "Adobe Illustrator",
+        "note": "Logo, icons, layouts and branding for Nature Network 2030 and the Grow Green email newsletter."
+      },
+      { "name": "Photoshop", "note": "Image editing." }
+    ],
+    "backstage": [
+      { "name": "SQL", "note": "Database tables and queries. In SkillSwap: the skill listings and search." },
+      { "name": "Python", "note": "Python Essential Training (LinkedIn Learning, 2025)." },
+      { "name": "Node.js", "note": "Runs the contact form of this portfolio, together with Express and SQLite." }
+    ]
+  },
+  "aboutHero": ["I code.", "I design.", "I listen first."],
+  "aboutChip": "OPEN TO INTERNSHIPS · FROM MID-MARCH",
+  "passes": [
+    {
+      "zone": "STUDY",
+      "stat": "2025–2028",
+      "label": "DIPLOMA IN IT",
+      "text": "Information Technology at Republic Polytechnic."
+    },
+    {
+      "zone": "BUILD",
+      "stat": "{projects}",
+      "label": "PROJECTS",
+      "text": "A web app built with a team, a campaign website and an email newsletter."
+    },
+    {
+      "zone": "COMMUNITY",
+      "stat": "2",
+      "label": "VOLUNTEER ROLES",
+      "text": "Working with children and with seniors. I also worked as a waitress alongside my studies."
+    }
+  ],
+  "offstage": {
+    "tag": "OUTSIDE CLASS",
+    "line": "I like the moment just before a concert begins.",
+    "after": "Outside class I follow SEVENTEEN, and I keep the ticket stubs and photocards from the concerts I attend. I would also like to try skydiving."
+  }
+}

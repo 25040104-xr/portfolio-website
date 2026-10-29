@@ -1,0 +1,161 @@
+/* ===== The opening: the stage fades up out of the dark, then one clear thing to do ===== */
+
+/* The stage is built behind the scenes and then fades in, so it never pops into view */
+.show-canvas {
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.show-canvas.ready {
+  opacity: 1;
+}
+
+/* ----- The tagline: the first thing to read, centred on the curtain ----- */
+.show-tagline {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: min(900px, 90vw);
+  margin: 0;
+  text-align: center;
+  transform: translate(-50%, -30%);
+  color: var(--cream);
+  font: 900 clamp(34px, 5.2vw, 76px) / 1.02 var(--display);
+  letter-spacing: 0.01em;
+  text-shadow:
+    0 3px 0 rgba(10, 20, 40, 0.55),
+    0 10px 30px rgba(5, 12, 30, 0.6);
+  pointer-events: none;
+  animation: tag-in 1s ease 0.3s backwards;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.show-tagline span {
+  display: block;
+  color: var(--yellow);
+}
+
+.show-tagline.gone {
+  opacity: 0;
+  transform: translate(-50%, -42%);
+}
+
+@keyframes tag-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -22%);
+  }
+}
+
+/* ----- The prompt: it arrives after the stage is lit, and rings spread out of it, which says "tap here" ----- */
+.show-prompt {
+  animation:
+    prompt-in 0.9s ease 0.5s backwards,
+    pulse 2.2s ease-in-out 1.5s infinite;
+}
+
+.show-prompt::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(255, 251, 245, 0.7);
+  border-radius: 999px;
+  pointer-events: none;
+  animation: ring 2.2s ease-out 1.5s infinite;
+}
+
+@keyframes prompt-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 18px);
+  }
+}
+
+@keyframes ring {
+  from {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.3, 1.9);
+  }
+}
+
+/* ----- Skip the opening: for someone who has no time for it ----- */
+.show-skip {
+  position: absolute;
+  left: 50%;
+  bottom: 3vh;
+  z-index: 3;
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  color: rgba(255, 251, 245, 0.85);
+  font: 600 14px / 1 var(--body);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transform: translateX(-50%);
+  animation: prompt-in 0.9s ease 0.9s backwards;
+}
+
+.show-skip:hover {
+  color: var(--yellow);
+}
+
+.show-skip:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+
+/* ----- The top bar: when I am available, on every screen ----- */
+.show-nav .avail {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1.5px solid rgba(232, 193, 74, 0.6);
+  border-radius: 999px;
+  color: var(--cream);
+  font: 600 13px / 1 var(--body);
+  white-space: nowrap;
+}
+
+.show-nav .avail::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 0 0 8px var(--yellow);
+}
+
+@media (max-width: 1000px) {
+  .show-nav .avail {
+    display: none;
+  }
+}
+
+/* ----- Tall, narrow screens (phones): the sign is bigger, so the tagline sits lower ----- */
+@media (max-aspect-ratio: 9/10) {
+  .show-tagline {
+    top: 66%;
+    font-size: clamp(28px, 8vw, 46px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .show-canvas,
+  .show-tagline {
+    transition: none;
+  }
+
+  .show-tagline,
+  .show-skip,
+  .show-prompt,
+  .show-prompt::after {
+    animation: none;
+  }
+}

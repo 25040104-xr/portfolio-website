@@ -1,0 +1,91 @@
+[
+  {
+    "slug": "skillswap",
+    "title": "SkillSwap",
+    "category": "code",
+    "role": "Team project · Skill Listing & Search",
+    "summary": "A web app where users trade skills: list what you can teach or want to learn, get matched, schedule sessions. I built Skill Listing & Search.",
+    "tags": ["SQL", "Database", "Web app"],
+    "featured": true,
+    "thumb": "/img/projects/skillswap.jpg",
+    "screens": [
+      {
+        "src": "/img/projects/skillswap-browse.jpg",
+        "caption": "Browse Skills: the page I built. Search, filters and the skill cards that come from the database."
+      },
+      {
+        "src": "/img/projects/skillswap-landing.jpg",
+        "caption": "The landing page of the team's app."
+      }
+    ],
+    "problem": "Build a web app where users list skills they can teach or want to learn, get matched with other users, and schedule sessions to exchange skills. Badges and a levelling system encourage users to keep learning.",
+    "process": [
+      "Built the pages where users add, edit and browse skills stored in the database.",
+      "Built a search bar so users can quickly find the skills they want to learn.",
+      "Made sure my part connected smoothly with my teammates' features."
+    ],
+    "result": "A working Skill Listing & Search feature inside a team-built app. I learned how to build my part of an app while keeping it connected to my teammates' work.",
+    "links": []
+  },
+  {
+    "slug": "nature-network-2030",
+    "title": "Nature Network 2030",
+    "category": "design",
+    "role": "Designer · website, logo, icons, branding",
+    "summary": "A four-page campaign website for the Singapore Green Plan 2030, showing how small everyday actions connect to build a greener Singapore.",
+    "tags": ["Adobe Illustrator", "Branding", "Campaign website"],
+    "featured": true,
+    "thumb": "/img/projects/nature-network-2030.jpg",
+    "screens": [
+      {
+        "src": "/img/projects/nn-home.jpg",
+        "caption": "Home: five actions around the logo, and the 2030 targets."
+      },
+      {
+        "src": "/img/projects/nn-events.jpg",
+        "caption": "Events: a numbered list with filters."
+      },
+      {
+        "src": "/img/projects/nn-about.jpg",
+        "caption": "About: the five actions and the 2030 journey."
+      },
+      {
+        "src": "/img/projects/nn-contact.jpg",
+        "caption": "Contact: a simple form to join the network."
+      }
+    ],
+    "problem": "Design a campaign website for the Singapore Green Plan 2030. I chose the City in Nature pillar and created the concept “Nature Network 2030”: how small everyday actions connect to build a greener Singapore.",
+    "process": [
+      "Chose the concept and the City in Nature pillar.",
+      "Used AI prompts to explore different icon styles.",
+      "Refined my final design in Adobe Illustrator: logo, icons and full branding.",
+      "Designed the four-page website."
+    ],
+    "result": "A four-page campaign website with its own logo, icon set and full branding.",
+    "links": []
+  },
+  {
+    "slug": "grow-green-grow-together",
+    "title": "Grow Green, Grow Together",
+    "category": "design",
+    "role": "Designer · EDM (email newsletter)",
+    "summary": "An email newsletter (EDM) for the Singapore Green Plan 2030 that invites residents to join community gardening.",
+    "tags": ["Adobe Illustrator", "EDM", "Campaign"],
+    "featured": true,
+    "thumb": "/img/projects/grow-green.jpg",
+    "screens": [
+      {
+        "src": "/img/projects/grow-green-edm.jpg",
+        "caption": "The final EDM: hero, three reasons, a call-to-action, and the numbers."
+      }
+    ],
+    "problem": "Design an EDM (email newsletter) for the Singapore Green Plan 2030. I chose the City in Nature pillar and created the campaign “Grow Green, Grow Together” to encourage Singapore residents to join community gardening.",
+    "process": [
+      "Built a mood board.",
+      "Sketched the layout.",
+      "Designed the final EDM in Adobe Illustrator, with a clear visual hierarchy."
+    ],
+    "result": "A final EDM with a clear visual hierarchy and a strong call-to-action: “Find a Community Garden Near You”.",
+    "links": []
+  }
+]

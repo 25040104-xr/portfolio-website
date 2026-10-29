@@ -1,0 +1,93 @@
+/* ===== Work: the poster wall is the way in. A slim bar filters it. ===== */
+.show .workbar {
+  position: absolute;
+  right: 4vw;
+  bottom: 12vh;
+  max-width: calc(100vw - 8vw);
+  padding: 14px 18px 16px;
+  border-radius: 18px;
+  background: var(--cream);
+  color: var(--navy);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(14px);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 20px 40px rgba(5, 12, 30, 0.5),
+    0 6px 14px rgba(5, 12, 30, 0.35);
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 1.2, 0.3, 1), visibility 0s linear 0.5s;
+}
+
+.show .workbar.in {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s;
+}
+
+.show .workbar p {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.show .workbar .chips {
+  margin-top: 0;
+}
+
+/* When there are more projects than the wall holds: turn the page */
+.show .pager {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.show .pager .chip {
+  padding: 6px 14px;
+  font-size: 18px;
+}
+
+/* For keyboard users: the projects can be reached with Tab. The list appears while it has focus. */
+.show .kbd-list {
+  position: absolute;
+  left: 50%;
+  bottom: 13vh;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: calc(100vw - 8vw);
+  margin: 0;
+  padding: 12px 16px;
+  list-style: none;
+  border-radius: 16px;
+  background: var(--cream);
+  box-shadow: 0 20px 40px rgba(5, 12, 30, 0.5);
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  clip-path: inset(50%);
+}
+
+.show .kbd-list:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  clip-path: none;
+}
+
+@media (max-width: 760px) {
+  .show .workbar {
+    left: 4vw;
+    right: 4vw;
+    bottom: 11vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .show .workbar {
+    transition: none;
+  }
+}
