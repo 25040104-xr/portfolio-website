@@ -4,6 +4,9 @@ import Doll from "./Doll.jsx";
 import MicStand from "./MicStand.jsx";
 import { C } from "./palette.js";
 
+// How strong the soft light on my face is. 0 turns it off; 2 to 5 is a good range.
+const FILL = 3;
+
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 
 /* The riser with me and the microphone stand on it. They stand on one platform,
@@ -30,6 +33,9 @@ export default function Performer({ anim, outfit }) {
           <boxGeometry args={[3.02, 0.04, 0.01]} />
           <meshBasicMaterial color={C.yellow} toneMapped={false} />
         </mesh>
+
+        {/* a soft light in front of me, at face height: it lights the lower half of my face */}
+        <pointLight position={[0.2, 1.7, 1.5]} intensity={FILL} distance={6} decay={2} color="#FFF1DC" />
 
         <group position={[-0.25, 0.384, 0]} rotation={[0, 0.28, 0]}>
           <Doll outfit={outfit} anim={anim} />
