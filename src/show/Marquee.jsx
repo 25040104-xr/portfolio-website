@@ -109,6 +109,25 @@ function useSignTexture(portrait) {
   return tex;
 }
 
+/* The dark board of the sign: a slab with rounded corners, like the gold frame drawn on it */
+function roundedSlab(w, h, r, depth) {
+  const s = new THREE.Shape();
+  const x = -w / 2;
+  const y = -h / 2;
+  s.moveTo(x + r, y);
+  s.lineTo(x + w - r, y);
+  s.quadraticCurveTo(x + w, y, x + w, y + r);
+  s.lineTo(x + w, y + h - r);
+  s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  s.lineTo(x + r, y + h);
+  s.quadraticCurveTo(x, y + h, x, y + h - r);
+  s.lineTo(x, y + r);
+  s.quadraticCurveTo(x, y, x + r, y);
+  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 12 });
+  g.translate(0, 0, -depth / 2);
+  return g;
+}
+
 /* The bulbs around the sign. A wave of light runs along them: it says "this is a show", and draws the eye. */
 function Bulbs({ w, h, reduced }) {
   const mesh = useRef();
@@ -168,6 +187,45 @@ function Bulbs({ w, h, reduced }) {
   );
 }
 
+/* The light of the bulbs on the curtain around the sign: it makes the sign give light, not just sit there */
+function Halo({ w, h, anim }) {
+  const mat = useRef();
+  const tex = useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = 256;
+    c.height = 256;
+    const g = c.getContext("2d");
+    const r = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    r.addColorStop(0, "rgba(255,226,150,0.55)");
+    r.addColorStop(0.5, "rgba(255,226,150,0.18)");
+    r.addColorStop(1, "rgba(255,226,150,0)");
+    g.fillStyle = r;
+    g.fillRect(0, 0, 256, 256);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  }, []);
+
+  useFrame(() => {
+    if (mat.current) mat.current.opacity = 1 - easeInOut(anim.current.curtain);
+  });
+
+  return (
+    <mesh position={[0, 0, -0.2]}>
+      <planeGeometry args={[w * 1.7, h * 3.0]} />
+      <meshBasicMaterial
+        ref={mat}
+        map={tex}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        toneMapped={false}
+        fog={false}
+      />
+    </mesh>
+  );
+}
+
 /* The sign above the curtain: it hangs on two chains in front of it, and leaves when the curtain opens.
    It is part of the stage, so it has depth and the camera moves around it.
    Tapping it opens the curtain too. */
@@ -180,6 +238,9 @@ export default function Marquee({ anim, open, reduced, onOpen }) {
   const w = portrait ? 4.2 : 6.8;
   const h = portrait ? 3.15 : 1.7;
   const y = portrait ? 3.7 : 4.5;
+
+  // the corner radius of the gold frame drawn on the texture (36 px), in world units
+  const slab = useMemo(() => roundedSlab(w, h, w * (36 / (portrait ? 1024 : 2048)), 0.3), [w, h, portrait]);
 
   useFrame(() => {
     const g = group.current;
@@ -204,6 +265,8 @@ export default function Marquee({ anim, open, reduced, onOpen }) {
         document.body.style.cursor = "";
       }}
     >
+      <Halo w={w} h={h} anim={anim} />
+
       {[-1, 1].map((s) => (
         <mesh key={s} position={[s * (w / 2 - 0.45), h / 2 + 0.3, -0.05]}>
           <cylinderGeometry args={[0.02, 0.02, 0.6, 8]} />
@@ -211,15 +274,14 @@ export default function Marquee({ anim, open, reduced, onOpen }) {
         </mesh>
       ))}
 
-      <mesh castShadow>
-        <boxGeometry args={[w, h, 0.3]} />
+      <mesh castShadow geometry={slab}>
         <meshStandardMaterial color="#0A1428" roughness={0.6} />
       </mesh>
 
       {tex && (
         <mesh position={[0, 0, 0.152]}>
           <planeGeometry args={[w, h]} />
-          <meshBasicMaterial map={tex} toneMapped={false} fog={false} />
+          <meshBasicMaterial map={tex} transparent toneMapped={false} fog={false} />
         </mesh>
       )}
 

@@ -78,11 +78,40 @@
   clip-path: none;
 }
 
+/* ----- Phones: a lower, slimmer bar, so the names of the posters stay visible ----- */
 @media (max-width: 760px) {
   .show .workbar {
     left: 4vw;
     right: 4vw;
-    bottom: 11vh;
+    bottom: 9vh;
+    padding: 10px 14px 12px;
+    border-radius: 16px;
+  }
+
+  .show .workbar p {
+    margin: 0 0 8px;
+    font-size: 13px;
+  }
+
+  .show .workbar .chips {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .show .workbar .chip {
+    padding: 8px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .show .pager {
+    margin-top: 8px;
+  }
+
+  /* a panel never runs down into the "Next" button below it: if it is taller, it scrolls inside */
+  .show .panel.side {
+    max-height: calc(100dvh - 13vh - 84px);
+    overflow-y: auto;
   }
 }
 

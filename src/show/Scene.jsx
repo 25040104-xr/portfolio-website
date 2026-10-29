@@ -159,7 +159,7 @@ function Beam({ anim, blackout }) {
   useFrame(() => {
     if (!mat.current) return;
     const on = THREE.MathUtils.smoothstep(anim.current.curtain, 0.35, 0.9);
-    mat.current.opacity = on * (blackout.current ? 0.05 : 1) * 0.9;
+    mat.current.opacity = on * (blackout.current ? 0.05 : 1) * 0.45;
   });
 
   return (
