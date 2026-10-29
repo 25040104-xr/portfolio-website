@@ -12,6 +12,7 @@ export const COPY = {
     lines: [
       "I'm an IT student at Republic Polytechnic. I code and I design.",
       "I'm looking for an IT or software internship from mid-March.",
+      "My skills: Python, SQL, JavaScript, HTML and CSS.",
     ],
   },
   work: {

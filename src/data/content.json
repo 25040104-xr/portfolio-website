@@ -1,7 +1,5 @@
 {
-  "intro": "I am an Information Technology student at Republic Polytechnic. I build web applications and design digital campaigns, and I am looking for an internship starting in mid-March.",
   "resume": "",
-  "workLead": "Each project is presented as a case study: the problem, my process and the result. Choose a category to begin.",
   "categories": {
     "code": {
       "title": "Code",
@@ -38,7 +36,6 @@
     ]
   },
   "aboutHero": ["I code.", "I design.", "I listen first."],
-  "aboutChip": "OPEN TO INTERNSHIPS · FROM MID-MARCH",
   "passes": [
     {
       "zone": "STUDY",
@@ -54,14 +51,21 @@
     },
     {
       "zone": "COMMUNITY",
-      "stat": "2",
-      "label": "VOLUNTEER ROLES",
-      "text": "Working with children and with seniors. I also worked as a waitress alongside my studies."
+      "stat": "6",
+      "label": "VOLUNTEER & LEADERSHIP ROLES",
+      "text": "Volunteering with children and with seniors, and facilitator and ambassador roles at RP. I also worked as a waitress alongside my studies."
+    },
+    {
+      "zone": "AWARD",
+      "stat": "AY25/26",
+      "label": "DIRECTOR'S ROLL OF HONOUR",
+      "text": "Academic Year 25/26, Semester 2."
     }
   ],
   "offstage": {
-    "tag": "OUTSIDE CLASS",
-    "line": "I like the moment just before a concert begins.",
-    "after": "Outside class I follow SEVENTEEN, and I keep the ticket stubs and photocards from the concerts I attend. I would also like to try skydiving."
+    "tag": "WHY LIVE ENTERTAINMENT",
+    "line": "I know the moment before the show starts.",
+    "after": "I follow SEVENTEEN and keep the ticket stubs and photocards from the concerts I attend, so I use ticketing and fan platforms as a user. I want to build the software behind that experience.",
+    "objects": "Concerts · ticket stubs · photocards · skydiving is next on my list"
   }
 }

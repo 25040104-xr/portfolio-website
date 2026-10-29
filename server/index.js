@@ -36,6 +36,33 @@ function tooMany(ip) {
   return false;
 }
 
+/* Every message is also sent to my own email, so it is never lost
+   (a free host can wipe the database file when it restarts).
+   It needs two settings on the host: RESEND_API_KEY and MAIL_TO.
+   Without them (for example on my own computer) this does nothing. */
+async function notify(name, email, message) {
+  const key = process.env.RESEND_API_KEY;
+  const to = process.env.MAIL_TO;
+  if (!key || !to) return;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Portfolio <onboarding@resend.dev>",
+        to: [to],
+        reply_to: email,
+        subject: `New message from ${name.replace(/[\r\n]+/g, " ")} (portfolio)`,
+        text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) console.error("Email failed:", res.status, await res.text());
+  } catch (err) {
+    console.error("Email failed:", err.message);
+  }
+}
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const app = express();
@@ -47,7 +74,7 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/contact", (req, res) => {
+app.post("/api/contact", async (req, res) => {
   const { name, email, message, extra_note } = req.body || {};
 
   // Honeypot: people never see this field, bots fill it in.
@@ -74,6 +101,7 @@ app.post("/api/contact", (req, res) => {
   }
 
   insert.run(n, e, m, req.ip);
+  await notify(n, e, m);
   res.status(201).json({ ok: true });
 });
 
