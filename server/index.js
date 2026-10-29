@@ -2,7 +2,8 @@ import express from "express";
 import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 
-const PORT = 3002; // the previous version uses 3001; this one has its own
+// A host such as Render gives the port in PORT. On your computer it is 3002.
+const PORT = process.env.PORT || 3002;
 
 // The database is one file: server/data/messages.db
 mkdirSync("data", { recursive: true });
@@ -38,6 +39,8 @@ function tooMany(ip) {
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const app = express();
+// Online, the server sits behind other servers: the visitor's address is in a header
+app.set("trust proxy", true);
 app.use(express.json({ limit: "10kb" }));
 
 app.get("/api/health", (req, res) => {
@@ -75,5 +78,5 @@ app.post("/api/contact", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`API running at http://localhost:${PORT}`);
+  console.log(`API running on port ${PORT}`);
 });
