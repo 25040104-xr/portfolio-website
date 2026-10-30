@@ -38,18 +38,17 @@ const real = (url) => url && !url.includes("yourname");
 function AboutPanel({ onContact }) {
   const [view, setView] = useState("profile");
   const a = content.about;
+  const p = content.person;
   const s = content.stack;
   const groups = [
     ["Front-end", s.stage],
     ["Design", s.design || []],
     ["Back-end", s.backstage],
   ];
-  const live = content.offstage;
   const tabs = [
     ["profile", "Profile"],
     ["skills", "Skills"],
-    ["experience", "Experience"],
-    ["live", "Why live entertainment"],
+    ["person", p.tab],
   ];
 
   return (
@@ -105,22 +104,17 @@ function AboutPanel({ onContact }) {
         </div>
       )}
 
-      {view === "experience" && (
-        <ul className="about-scroll exp">
-          {a.experience.map((x) => (
-            <li key={x.role + x.org}>
-              <strong>{x.role}</strong> <span>{x.org}</span>
-              <em>{x.when}</em>
-              <p>{x.line}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {view === "live" && (
+      {view === "person" && (
         <>
-          <p className="lead">{live.line}</p>
-          <p>{live.after}</p>
+          <p className="lead">{p.lead}</p>
+          <dl className="facts-list">
+            {p.traits.map((t) => (
+              <div key={t.label}>
+                <dt>{t.label}</dt>
+                <dd>{t.value}</dd>
+              </div>
+            ))}
+          </dl>
         </>
       )}
     </>

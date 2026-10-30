@@ -16,51 +16,26 @@
       { "label": "Studying", "value": "Diploma in Information Technology, Republic Polytechnic (2025–2028)" },
       { "label": "Looking for", "value": "An IT or software internship, from mid-March" },
       { "label": "Skills", "value": "Python, SQL, JavaScript, HTML and CSS" },
+      { "label": "Experience", "value": "Customer service, student facilitator and diploma ambassador at RP, and volunteering with children and seniors" },
       { "label": "Languages", "value": "English and Mandarin" },
       { "label": "Award", "value": "Director's Roll of Honour, AY25/26 Semester 2" }
-    ],
-    "experience": [
+    ]
+  },
+  "person": {
+    "tab": "Beyond work",
+    "lead": "I listen first, and I build what I imagine.",
+    "traits": [
       {
-        "role": "Waitress",
-        "org": "Japan Food Holdings",
-        "when": "Nov 2024 – Jul 2025",
-        "line": "Handled orders and enquiries under time pressure, and resolved customer complaints by listening and offering practical solutions."
+        "label": "Listens first",
+        "value": "At MINDS School I adapted each activity to the child's pace. With seniors, I broke AI tools into small, hands-on steps."
       },
       {
-        "role": "Volunteer",
-        "org": "MINDS School",
-        "when": "Jul 2026",
-        "line": "Guided children with intellectual disabilities through individual activities, adapting to each child's pace."
+        "label": "Builds what I imagine",
+        "value": "I chose IT to turn an idea into something real that people can use, from a skill-search feature to this portfolio."
       },
       {
-        "role": "Student Facilitator",
-        "org": "International Students Welcome Programme, RP",
-        "when": "2026",
-        "line": "Led welcome activities for incoming international students."
-      },
-      {
-        "role": "Diploma Ambassador",
-        "org": "RP Open House",
-        "when": "2026",
-        "line": "Explained the IT course and career pathways to prospective students and parents."
-      },
-      {
-        "role": "Volunteer",
-        "org": "YCLP Ageless Connections: AI-mazing Race",
-        "when": "Dec 2025",
-        "line": "Coached seniors to use AI tools such as Meta AI and Gemini, step by step."
-      },
-      {
-        "role": "Student Helper",
-        "org": "RP x DDAS NYC AEP Mass Event",
-        "when": "2025",
-        "line": "Ushered attendees and coordinated with the organising team."
-      },
-      {
-        "role": "Member",
-        "org": "The Globalites (interest group)",
-        "when": "2025 – present",
-        "line": "Joined the RP-NYC Asia-Ready Exposure Programme trip to Shenzhen, China (Mar 2026)."
+        "label": "Loves the live moment",
+        "value": "I follow SEVENTEEN and keep the ticket stubs and photocards from the concerts I attend. Skydiving is next on my list."
       }
     ]
   },
@@ -88,11 +63,5 @@
       { "name": "Python", "note": "Python Essential Training (LinkedIn Learning, 2025)." },
       { "name": "Node.js", "note": "Runs the contact form of this portfolio, together with Express and SQLite." }
     ]
-  },
-  "offstage": {
-    "tag": "WHY LIVE ENTERTAINMENT",
-    "line": "I know the moment before the show starts.",
-    "after": "I follow SEVENTEEN and keep the ticket stubs and photocards from the concerts I attend, so I use ticketing and fan platforms as a user. I want to build the software behind that experience.",
-    "objects": "Concerts · ticket stubs · photocards · skydiving is next on my list"
   }
 }
