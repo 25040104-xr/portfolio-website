@@ -1,6 +1,11 @@
+import dns from "node:dns";
 import express from "express";
 import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
+
+// Some hosts have no working IPv6 route, and a request to a site that has both kinds of address
+// then fails with "fetch failed". Asking for the IPv4 address first avoids that.
+dns.setDefaultResultOrder("ipv4first");
 
 // A host such as Render gives the port in PORT. On your computer it is 3002.
 const PORT = process.env.PORT || 3002;
@@ -36,6 +41,12 @@ function tooMany(ip) {
   return false;
 }
 
+// The real reason a request failed (the short message "fetch failed" hides it)
+function why(err) {
+  const c = err && err.cause;
+  return [err && err.message, c && (c.code || c.name), c && c.message].filter(Boolean).join(" | ");
+}
+
 /* Every message is also sent to my phone through a Telegram bot, so it is never lost
    (a free host can wipe the database file when it restarts).
    It needs two settings on the host: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.
@@ -61,7 +72,7 @@ async function notify(name, email, message, flagged) {
     if (res.ok) console.log("Telegram notification sent.");
     else console.error("Telegram notification FAILED:", res.status, await res.text());
   } catch (err) {
-    console.error("Telegram notification FAILED:", err.message);
+    console.error("Telegram notification FAILED:", why(err));
   }
 }
 
@@ -72,14 +83,29 @@ const app = express();
 app.set("trust proxy", true);
 app.use(express.json({ limit: "10kb" }));
 
-// One line in the logs for every request to the API: it shows that a request really arrived
+// One line in the logs for every request to the API (except the health check, which is very frequent)
 app.use((req, res, next) => {
-  if (req.path.startsWith("/api/")) console.log(req.method, req.path);
+  if (req.path.startsWith("/api/") && req.path !== "/api/health") console.log(req.method, req.path);
   next();
 });
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true });
+});
+
+// Open this address in a browser to see if this server can reach Telegram.
+// It only asks Telegram who the bot is: no message is sent, and the token is never shown.
+app.get("/api/telegram-check", async (req, res) => {
+  if (tooMany("check:" + req.ip)) return res.status(429).json({ ok: false, error: "Try again in a few minutes." });
+  const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
+  if (!token) return res.json({ ok: false, error: "TELEGRAM_BOT_TOKEN is not set" });
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/getMe`, { signal: AbortSignal.timeout(8000) });
+    const data = await r.json().catch(() => ({}));
+    res.json({ ok: r.ok, status: r.status, bot: data.result && data.result.username });
+  } catch (err) {
+    res.json({ ok: false, error: why(err) });
+  }
 });
 
 app.post("/api/contact", async (req, res) => {
