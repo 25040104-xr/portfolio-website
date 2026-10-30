@@ -20,7 +20,7 @@ export const COPY = {
     pickNote: "Two kinds of work. Choose one to see the projects.",
     listNote: "Pick a project to read the case study.",
   },
-  about: { title: "A little about me." },
+  about: { title: "About me." },
   contact: {
     title: "Your turn.",
     note: "Send me a message. I will reply as soon as I can.",

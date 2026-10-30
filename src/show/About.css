@@ -1,0 +1,104 @@
+/* ===== About: tabs on top, then a clear list ===== */
+.show .tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 14px;
+}
+
+.show .tabs .chip {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+/* the quick facts: a label on the left, the answer on the right */
+.show .facts-list {
+  margin: 12px 0 0;
+}
+
+.show .facts-list > div {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(23, 42, 82, 0.12);
+}
+
+.show .facts-list dt {
+  padding-top: 4px;
+  color: #5a6a8f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.show .facts-list dd {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+/* a long list scrolls inside the panel, and the tabs stay in place */
+.show .about-scroll {
+  max-height: min(44vh, 400px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 0 6px 0 0;
+}
+
+.show .exp {
+  list-style: none;
+}
+
+.show .exp li {
+  padding: 10px 0;
+  border-top: 1px solid rgba(23, 42, 82, 0.12);
+}
+
+.show .exp li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.show .exp strong {
+  color: var(--cobalt);
+  font-size: 17px;
+}
+
+.show .exp span {
+  font-weight: 600;
+}
+
+.show .exp em {
+  display: block;
+  margin: 2px 0 4px;
+  color: #5a6a8f;
+  font-size: 13px;
+  font-style: normal;
+}
+
+.show .exp p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* on a short laptop screen, a tall panel scrolls instead of running off the screen */
+@media (min-width: 761px) {
+  .show .panel.side {
+    max-height: calc(100dvh - 150px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .show .facts-list > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .show .about-scroll {
+    max-height: 34vh;
+  }
+}

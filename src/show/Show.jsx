@@ -8,6 +8,7 @@ import CaseStudy from "./CaseStudy.jsx";
 import "./Show.css";
 import "./Work.css";
 import "./Opening.css";
+import "./About.css";
 
 // The 3D scene is loaded after the page, so the words never wait for it
 const Scene = lazy(() => import("./Scene.jsx"));
@@ -33,9 +34,10 @@ const FILTERS = [
 const PER_PAGE = 6; // how many posters one side of the wall shows before it turns the page
 const real = (url) => url && !url.includes("yourname");
 
-/* ---------------- About: me, skills, and why live entertainment ---------------- */
-function AboutPanel() {
-  const [view, setView] = useState("me");
+/* ---------------- About: who I am, in the order a recruiter needs it ---------------- */
+function AboutPanel({ onContact }) {
+  const [view, setView] = useState("profile");
+  const a = content.about;
   const s = content.stack;
   const groups = [
     ["Front-end", s.stage],
@@ -43,33 +45,77 @@ function AboutPanel() {
     ["Back-end", s.backstage],
   ];
   const live = content.offstage;
+  const tabs = [
+    ["profile", "Profile"],
+    ["skills", "Skills"],
+    ["experience", "Experience"],
+    ["live", "Why live entertainment"],
+  ];
 
   return (
     <>
       <h2>{COPY.about.title}</h2>
 
-      {view === "me" && (
+      <div className="tabs" role="group" aria-label="About sections">
+        {tabs.map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={view === id ? "chip fill" : "chip"}
+            aria-pressed={view === id}
+            onClick={() => setView(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {view === "profile" && (
         <>
-          <p className="lead">{content.aboutHero.join(" ")}</p>
-          <ul className="facts">
-            {content.passes.map((p) => (
-              <li key={p.zone}>
-                <b>{p.stat === "{projects}" ? projects.length : p.stat}</b>
-                <span>{p.label}</span>
-                <p>{p.text}</p>
-              </li>
+          <p className="lead">{a.summary}</p>
+          <dl className="facts-list">
+            {a.facts.map((f) => (
+              <div key={f.label}>
+                <dt>{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
             ))}
-          </ul>
+          </dl>
+          <div className="chips">
+            {content.resume && (
+              <a className="chip fill" href={content.resume} target="_blank" rel="noreferrer">
+                Resume (PDF)
+              </a>
+            )}
+            <button type="button" className="chip" onClick={onContact}>
+              Contact me
+            </button>
+          </div>
         </>
       )}
 
-      {view === "skills" &&
-        groups.map(([label, list]) => (
-          <div key={label} className="skill-row">
-            <span>{label}</span>
-            <p>{list.map((x) => x.name).join(" · ")}</p>
-          </div>
-        ))}
+      {view === "skills" && (
+        <div className="about-scroll">
+          {groups.map(([label, list]) => (
+            <div key={label} className="skill-row">
+              <span>{label}</span>
+              <p>{list.map((x) => x.name).join(" · ")}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {view === "experience" && (
+        <ul className="about-scroll exp">
+          {a.experience.map((x) => (
+            <li key={x.role + x.org}>
+              <strong>{x.role}</strong> <span>{x.org}</span>
+              <em>{x.when}</em>
+              <p>{x.line}</p>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {view === "live" && (
         <>
@@ -77,23 +123,6 @@ function AboutPanel() {
           <p>{live.after}</p>
         </>
       )}
-
-      <div className="chips">
-        {[
-          ["me", "Me"],
-          ["skills", "Skills"],
-          ["live", "Why live entertainment"],
-        ].map(([id, label]) => (
-          <button key={id} type="button" className={view === id ? "chip fill" : "chip"} onClick={() => setView(id)}>
-            {label}
-          </button>
-        ))}
-        {content.resume && (
-          <a className="chip" href={content.resume} target="_blank" rel="noreferrer">
-            Résumé
-          </a>
-        )}
-      </div>
     </>
   );
 }
@@ -526,7 +555,7 @@ export default function Show() {
         {/* Act 3: About */}
         <section className="act" aria-label="About">
           <div className={act === 2 ? "panel side in" : "panel side"}>
-            <AboutPanel />
+            <AboutPanel onContact={() => go(3)} />
           </div>
           <button type="button" className="cue" onClick={() => go(3)}>
             Next: Contact ↓
