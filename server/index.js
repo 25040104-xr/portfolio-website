@@ -39,8 +39,8 @@ function tooMany(ip) {
 /* Every message is also sent to my phone through a Telegram bot, so it is never lost
    (a free host can wipe the database file when it restarts).
    It needs two settings on the host: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.
-   The result is always written in the logs, so it is easy to see what happened. */
-async function notify(name, email, message) {
+   What happened is always written in the logs. */
+async function notify(name, email, message, flagged) {
   const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
   const chat = (process.env.TELEGRAM_CHAT_ID || "").trim();
   if (!token || !chat) {
@@ -54,7 +54,7 @@ async function notify(name, email, message) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: chat,
-        text: `New portfolio message\\n\\nName: ${name}\\nEmail: ${email}\\n\\n${message}`,
+        text: `${flagged ? "[spam trap was filled] " : ""}New portfolio message\n\nName: ${name}\nEmail: ${email}\n\n${message}`,
       }),
       signal: AbortSignal.timeout(8000),
     });
@@ -65,12 +65,18 @@ async function notify(name, email, message) {
   }
 }
 
-const EMAIL = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const app = express();
 // Online, the server sits behind other servers: the visitor's address is in a header
 app.set("trust proxy", true);
 app.use(express.json({ limit: "10kb" }));
+
+// One line in the logs for every request to the API: it shows that a request really arrived
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) console.log(req.method, req.path);
+  next();
+});
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true });
@@ -79,9 +85,11 @@ app.get("/api/health", (req, res) => {
 app.post("/api/contact", async (req, res) => {
   const { name, email, message, extra_note } = req.body || {};
 
-  // Honeypot: people never see this field, bots fill it in.
-  // Answer "ok" anyway so a bot does not learn it was caught.
-  if (extra_note) return res.status(200).json({ ok: true });
+  // A hidden field that people never see and bots fill in. A browser's autofill can fill it too,
+  // and a real message must never be lost, so the message is still checked and saved.
+  // It is only marked, so that I can see it.
+  const flagged = typeof extra_note === "string" && extra_note.trim() !== "";
+  if (flagged) console.log("The hidden spam-trap field was filled (a bot, or the browser's autofill). Saving the message anyway.");
 
   // Validate on the server too. The browser checks can be skipped.
   const n = typeof name === "string" ? name.trim() : "";
@@ -104,7 +112,7 @@ app.post("/api/contact", async (req, res) => {
 
   insert.run(n, e, m, req.ip);
   console.log("Message saved.");
-  await notify(n, e, m);
+  await notify(n, e, m, flagged);
   res.status(201).json({ ok: true });
 });
 
