@@ -39,28 +39,33 @@ function tooMany(ip) {
 /* Every message is also sent to my phone through a Telegram bot, so it is never lost
    (a free host can wipe the database file when it restarts).
    It needs two settings on the host: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.
-   Without them (for example on my own computer) this does nothing. */
+   The result is always written in the logs, so it is easy to see what happened. */
 async function notify(name, email, message) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chat = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chat) return;
+  const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
+  const chat = (process.env.TELEGRAM_CHAT_ID || "").trim();
+  if (!token || !chat) {
+    const missing = [!token && "TELEGRAM_BOT_TOKEN", !chat && "TELEGRAM_CHAT_ID"].filter(Boolean).join(" and ");
+    console.log(`Telegram is NOT set up on this server: ${missing} is missing.`);
+    return;
+  }
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: chat,
-        text: `New portfolio message\n\nName: ${name}\nEmail: ${email}\n\n${message}`,
+        text: `New portfolio message\\n\\nName: ${name}\\nEmail: ${email}\\n\\n${message}`,
       }),
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) console.error("Notification failed:", res.status, await res.text());
+    if (res.ok) console.log("Telegram notification sent.");
+    else console.error("Telegram notification FAILED:", res.status, await res.text());
   } catch (err) {
-    console.error("Notification failed:", err.message);
+    console.error("Telegram notification FAILED:", err.message);
   }
 }
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
 
 const app = express();
 // Online, the server sits behind other servers: the visitor's address is in a header
@@ -98,10 +103,12 @@ app.post("/api/contact", async (req, res) => {
   }
 
   insert.run(n, e, m, req.ip);
+  console.log("Message saved.");
   await notify(n, e, m);
   res.status(201).json({ ok: true });
 });
 
 app.listen(PORT, () => {
-  console.log(`API running on port ${PORT}`);
+  const ready = process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID;
+  console.log(`API running on port ${PORT}. Telegram: ${ready ? "set up" : "NOT set up"}.`);
 });
