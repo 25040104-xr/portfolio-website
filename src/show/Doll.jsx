@@ -7,8 +7,8 @@ import { C } from "./palette.js";
 const HEIGHT = 1.95; // a model of your own is scaled to this height
 
 // How I look: brown hair to the collarbone, light-brown square glasses, a V-neck top
-const HAIR = "#6E4A2E";
-const FRAME = "#B88858";
+const HAIR = "#563822";
+const FRAME = "#9A6A3A";
 const TOP_GREY = "#C9CED6";
 const TOP_NAVY = "#1B2A4C";
 
@@ -63,6 +63,8 @@ function GlbDoll({ url }) {
   );
 }
 
+/* An arm: it starts inside the shoulder, and the hand overlaps the end of the arm,
+   so that no part is only touching the next one. */
 function Arm({ shirt }) {
   return (
     <>
@@ -70,8 +72,8 @@ function Arm({ shirt }) {
         <capsuleGeometry args={[0.055, 0.3, 6, 12]} />
         <meshStandardMaterial color={shirt} roughness={0.75} />
       </mesh>
-      <mesh position={[0, -0.46, 0]} castShadow>
-        <sphereGeometry args={[0.065, 16, 12]} />
+      <mesh position={[0, -0.43, 0]} castShadow>
+        <sphereGeometry args={[0.068, 16, 12]} />
         <meshStandardMaterial color={C.skin} roughness={0.7} />
       </mesh>
     </>
@@ -116,7 +118,9 @@ function Glasses() {
   );
 }
 
-/* A toy-like figure built from simple shapes: the stand-in until you have a model of your own */
+/* A toy-like figure built from simple shapes: the stand-in until you have a model of your own.
+   Every part overlaps the next one: the legs go into the body, the shoulders are balls,
+   the neck joins the head to the body, and the hands overlap the arms. */
 function ToyDoll({ outfit, anim }) {
   const root = useRef();
   const head = useRef();
@@ -145,29 +149,37 @@ function ToyDoll({ outfit, anim }) {
     if (armWave.current) {
       // a wave once I have risen: this is how I say hello
       const w = outfit === "hello" ? anim.current.wave : 99;
-      const goal = w > 0 && w < 2.4 ? 2.5 + Math.sin(w * 11) * 0.3 : 0.14;
+      const goal = w > 0 && w < 2.4 ? 2.5 + Math.sin(w * 11) * 0.3 : 0.12;
       armWave.current.rotation.z = THREE.MathUtils.damp(armWave.current.rotation.z, goal, 10, dt);
     }
   });
 
   return (
     <group ref={root}>
+      {/* the feet and legs: the legs go up into the body */}
       {[-1, 1].map((s) => (
-        <mesh key={`shoe${s}`} position={[s * 0.1, 0.04, 0.04]} castShadow>
-          <boxGeometry args={[0.15, 0.08, 0.26]} />
+        <mesh key={`shoe${s}`} position={[s * 0.1, 0.05, 0.04]} castShadow>
+          <boxGeometry args={[0.15, 0.1, 0.26]} />
           <meshStandardMaterial color={C.cream} roughness={0.6} />
         </mesh>
       ))}
       {[-1, 1].map((s) => (
-        <mesh key={`leg${s}`} position={[s * 0.1, 0.315, 0]} castShadow>
-          <capsuleGeometry args={[0.075, 0.32, 6, 14]} />
+        <mesh key={`leg${s}`} position={[s * 0.1, 0.32, 0]} castShadow>
+          <capsuleGeometry args={[0.078, 0.34, 6, 14]} />
           <meshStandardMaterial color={C.navy} roughness={0.7} />
         </mesh>
       ))}
 
+      {/* the body */}
       <mesh position={[0, 0.84, 0]} castShadow>
         <capsuleGeometry args={[0.2, 0.28, 8, 20]} />
         <meshStandardMaterial color={shirt} roughness={0.75} />
+      </mesh>
+
+      {/* the neck joins the head to the body */}
+      <mesh position={[0, 1.17, 0]} castShadow>
+        <cylinderGeometry args={[0.085, 0.095, 0.2, 20]} />
+        <meshStandardMaterial color={C.skin} roughness={0.7} />
       </mesh>
 
       {/* the V-neck */}
@@ -176,10 +188,18 @@ function ToyDoll({ outfit, anim }) {
         <meshStandardMaterial color={C.skin} roughness={0.7} side={THREE.DoubleSide} />
       </mesh>
 
-      <group position={[-0.26, 1.08, 0]} rotation={[0, 0, -0.14]}>
+      {/* the shoulders are balls, so the arms grow out of the body */}
+      {[-1, 1].map((s) => (
+        <mesh key={`shoulder${s}`} position={[s * 0.2, 1.08, 0]} castShadow>
+          <sphereGeometry args={[0.085, 18, 14]} />
+          <meshStandardMaterial color={shirt} roughness={0.75} />
+        </mesh>
+      ))}
+
+      <group position={[-0.22, 1.08, 0]} rotation={[0, 0, -0.12]}>
         <Arm shirt={shirt} />
       </group>
-      <group ref={armWave} position={[0.26, 1.08, 0]} rotation={[0, 0, 0.14]}>
+      <group ref={armWave} position={[0.22, 1.08, 0]} rotation={[0, 0, 0.12]}>
         <Arm shirt={shirt} />
       </group>
 
@@ -237,8 +257,8 @@ function ToyDoll({ outfit, anim }) {
         </group>
       )}
 
-      {/* the head: large, like a toy */}
-      <group ref={head} position={[0, 1.52, 0]}>
+      {/* the head: large, like a toy. It sits low enough to overlap the neck. */}
+      <group ref={head} position={[0, 1.47, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.34, 40, 28]} />
           <meshStandardMaterial color={C.skin} roughness={0.7} />
