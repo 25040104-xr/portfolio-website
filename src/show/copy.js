@@ -6,7 +6,6 @@ export const COPY = {
   // The first thing to read, centred on the closed curtain. The second line is shown in yellow.
   tagline: ["I design what you see.", "I build what runs behind it."],
   // Shown in the top bar once the show has begun
-  available: "Open to IT & software internships · from mid-March",
   hello: {
     title: "Hello, I'm XinRui.",
     lines: [
