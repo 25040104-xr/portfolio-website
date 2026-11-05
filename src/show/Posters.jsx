@@ -7,7 +7,7 @@ import { C } from "./palette.js";
 // The projects hang on the back wall. On a laptop: CODE on the left, DESIGN on the right.
 // On a phone the screen is narrow, so CODE sits above DESIGN.
 const WALL_Z = -6.45;
-const ZONES = { code: [-6.0, -2.0], design: [0.0, 4.8] }; // left and right edge of each zone (laptop)
+const ZONES = { code: [-3.0, 0.2], design: [0.6, 4.4] }; // left and right edge of each zone (laptop)
 const ZONES_PORTRAIT = { code: [-2.4, 2.4], design: [-2.4, 2.4] }; // phone: both zones are as wide as the screen
 const BASE_Y_PORTRAIT = { code: 5.9, design: 3.0 }; // phone: the height of the row of posters in each zone
 const TITLES = { code: "CODE", design: "DESIGN" };

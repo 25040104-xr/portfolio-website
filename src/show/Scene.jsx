@@ -22,7 +22,7 @@ const CURTAIN_POSE_PORTRAIT = { pos: [0, 3.2, 17], look: [0, 3.2, 0] };
 
 const POSES = [
   { pos: [1.2, 1.6, 4.6], look: [0.0, 1.4, -1.8] }, // 0 Home: me and the microphone
-  { pos: [0.8, 1.7, 3.0], look: [-0.6, 2.2, -4.0] }, // 1 Work: the back wall
+  { pos: [1.4, 1.7, 3.0], look: [0.4, 2.2, -4.0] }, // 1 Work: the back wall, seen a little from the right, // 1 Work: the back wall
   { pos: [-2.4, 1.5, 2.2], look: [-1.3, 1.4, -1.8] }, // 2 About: close to me
   { pos: [0.5, 1.45, 2.7], look: [-0.9, 1.35, -1.8] }, // 3 Contact: close to the microphone
 ];

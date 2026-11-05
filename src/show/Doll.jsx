@@ -11,6 +11,7 @@ const HAIR = "#563822";
 const FRAME = "#9A6A3A";
 const TOP_GREY = "#C9CED6";
 const TOP_NAVY = "#1B2A4C";
+const SKIN_V = "#D9AA8C"; // the skin in the V of the neckline: a little darker, because the light makes it look yellow
 
 async function exists(url) {
   try {
@@ -210,12 +211,13 @@ function ToyDoll({ outfit, anim }) {
       ))}
       {[-1, 1].map((s) => (
         <mesh key={`leg${s}`} position={[s * 0.1, 0.32, 0]} castShadow>
-          <cylinderGeometry args={[0.082, 0.072, 0.5, 20]} />
+          <cylinderGeometry args={[0.092, 0.072, 0.5, 20]} />
           <meshStandardMaterial color={trousers} roughness={0.85} bumpMap={fabric} bumpScale={0.4} />
         </mesh>
       ))}
+      {/* the hips narrow down into the legs, so the trousers are one piece of clothing, not a skirt */}
       <mesh position={[0, 0.62, 0]} castShadow>
-        <cylinderGeometry args={[0.205, 0.205, 0.26, 28]} />
+        <cylinderGeometry args={[0.205, 0.188, 0.3, 28]} />
         <meshStandardMaterial color={trousers} roughness={0.85} bumpMap={fabric} bumpScale={0.4} />
       </mesh>
 
@@ -238,7 +240,7 @@ function ToyDoll({ outfit, anim }) {
       {/* the V-neck, with a trim along both edges */}
       <mesh position={[0, 1.1, 0.192]}>
         <shapeGeometry args={[vShape]} />
-        <meshStandardMaterial color={C.skin} roughness={0.7} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={SKIN_V} roughness={0.9} side={THREE.DoubleSide} />
       </mesh>
       {[-1, 1].map((s) => (
         <mesh key={`vtrim${s}`} position={[s * 0.05, 1.02, 0.198]} rotation={[0, 0, -s * 0.5586]}>
@@ -302,9 +304,9 @@ function ToyDoll({ outfit, anim }) {
         </group>
       )}
 
-      {/* Contact: a phone */}
+      {/* Contact: a phone, held in the hand (the hand is at about x 0.27, y 0.64) */}
       {outfit === "contact" && (
-        <group position={[0.34, 0.78, 0.14]} rotation={[-0.3, 0, 0]}>
+        <group position={[0.28, 0.69, 0.1]} rotation={[-0.25, 0, 0]}>
           <mesh castShadow>
             <boxGeometry args={[0.07, 0.14, 0.012]} />
             <meshStandardMaterial color={C.navy} roughness={0.4} />
