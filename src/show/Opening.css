@@ -111,7 +111,7 @@
   outline-offset: 3px;
 }
 
-/* ----- The top bar: when I am available, on every screen ----- */
+/* ----- The top bar: a label, when there is one ----- */
 .show-nav .avail {
   display: inline-flex;
   align-items: center;
@@ -131,6 +131,11 @@
   border-radius: 50%;
   background: var(--yellow);
   box-shadow: 0 0 8px var(--yellow);
+}
+
+/* No words in it (the text was removed from copy.js): no frame and no yellow dot either */
+.show-nav .avail:empty {
+  display: none;
 }
 
 @media (max-width: 1000px) {

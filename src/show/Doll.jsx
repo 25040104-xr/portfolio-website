@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { RoundedBox, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { C } from "./palette.js";
 
@@ -164,6 +164,55 @@ function Glasses() {
   );
 }
 
+/* A flat strap between two points */
+const UP = new THREE.Vector3(0, 1, 0);
+function Strap({ a, b, color }) {
+  const A = new THREE.Vector3(...a);
+  const B = new THREE.Vector3(...b);
+  const d = B.clone().sub(A);
+  const len = d.length();
+  const quat = new THREE.Quaternion().setFromUnitVectors(UP, d.clone().normalize());
+  const mid = A.clone().add(B).multiplyScalar(0.5);
+  return (
+    <mesh position={mid} quaternion={quat}>
+      <boxGeometry args={[0.016, len, 0.006]} />
+      <meshStandardMaterial color={color} roughness={0.6} />
+    </mesh>
+  );
+}
+
+/* The pass, worn: a lanyard loop round the neck, two straps that follow the body down to a metal clip,
+   and a card with rounded corners that hangs from the clip, a little away from the chest. */
+function Lanyard() {
+  return (
+    <group>
+      <mesh position={[0, 1.135, 0.005]} rotation={[Math.PI / 2 - 0.25, 0, 0]}>
+        <torusGeometry args={[0.1, 0.009, 8, 36]} />
+        <meshStandardMaterial color={C.yellow} roughness={0.6} />
+      </mesh>
+      {[-1, 1].map((s) => (
+        <group key={s}>
+          <Strap a={[s * 0.075, 1.11, 0.1]} b={[s * 0.05, 1.045, 0.2]} color={C.yellow} />
+          <Strap a={[s * 0.05, 1.045, 0.2]} b={[0, 0.958, 0.212]} color={C.yellow} />
+        </group>
+      ))}
+      <group position={[0, 0.958, 0.212]} rotation={[-0.1, 0, 0]}>
+        <mesh position={[0, -0.012, 0.004]}>
+          <boxGeometry args={[0.03, 0.03, 0.014]} />
+          <meshStandardMaterial color="#B8BFCC" metalness={0.7} roughness={0.35} />
+        </mesh>
+        <RoundedBox args={[0.11, 0.15, 0.012]} radius={0.012} smoothness={4} position={[0, -0.095, 0.008]} castShadow>
+          <meshStandardMaterial color={C.cobalt} roughness={0.5} />
+        </RoundedBox>
+        <mesh position={[0, -0.045, 0.0145]}>
+          <boxGeometry args={[0.1, 0.028, 0.004]} />
+          <meshStandardMaterial color={C.yellow} roughness={0.5} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
 /* A toy-like figure built from simple shapes, dressed in clothes that look like clothes:
    a V-neck top with a trimmed neckline, long sleeves with cuffs, a hem, trousers and sneakers.
    Every part overlaps the next one, so the body does not fall apart. */
@@ -173,10 +222,15 @@ function ToyDoll({ outfit, anim }) {
   const eyes = useRef();
   const armWave = useRef();
   const work = outfit === "work";
+  const contact = outfit === "contact";
   const shirt = work ? TOP_NAVY : TOP_GREY;
   const trim = work ? "#111A30" : "#A5ACB9"; // a darker shade of the top: the neckline, hem and cuffs
   const trousers = work ? "#262B36" : C.navy;
   const fabric = useMemo(makeFabric, []);
+
+  // In Work both arms come forward and hold the laptop; in Contact the right arm holds the phone
+  const armL = work ? -0.75 : 0;
+  const armR = work ? -0.75 : contact ? -1.1 : 0;
 
   const vShape = useMemo(() => {
     const s = new THREE.Shape();
@@ -257,62 +311,54 @@ function ToyDoll({ outfit, anim }) {
         </mesh>
       ))}
 
-      <group position={[-0.22, 1.08, 0]} rotation={[0, 0, -0.12]}>
+      <group position={[-0.22, 1.08, 0]} rotation={[armL, 0, -0.12]}>
         <Arm shirt={shirt} trim={trim} fabric={fabric} />
       </group>
-      <group ref={armWave} position={[0.22, 1.08, 0]} rotation={[0, 0, 0.12]}>
+      <group ref={armWave} position={[0.22, 1.08, 0]} rotation={[armR, 0, 0.12]}>
         <Arm shirt={shirt} trim={trim} fabric={fabric} />
       </group>
 
-      {/* Hello: the pass on a lanyard */}
-      {outfit === "hello" && (
-        <group>
-          {[-1, 1].map((s) => (
-            <mesh key={`strap${s}`} position={[s * 0.075, 1.0, 0.2]} rotation={[0, 0, -s * 0.28]}>
-              <boxGeometry args={[0.018, 0.3, 0.012]} />
-              <meshStandardMaterial color={C.yellow} roughness={0.5} />
-            </mesh>
-          ))}
-          <mesh position={[0, 0.87, 0.21]}>
-            <boxGeometry args={[0.11, 0.15, 0.014]} />
-            <meshStandardMaterial color={C.cobalt} roughness={0.5} />
-          </mesh>
-          <mesh position={[0, 0.925, 0.213]}>
-            <boxGeometry args={[0.11, 0.03, 0.016]} />
-            <meshStandardMaterial color={C.yellow} roughness={0.5} />
-          </mesh>
-        </group>
-      )}
+      {/* Hello: the pass, worn on a lanyard */}
+      {outfit === "hello" && <Lanyard />}
 
-      {/* Work: a laptop */}
+      {/* Work: a laptop in both hands. The keyboard is level; the screen is hinged at the far edge,
+          leans back and faces me, so the audience sees its back, with a small yellow dot. */}
       {work && (
-        <group position={[0, 0.7, 0.34]}>
+        <group position={[0, 0.74, 0.32]}>
           <mesh castShadow>
             <boxGeometry args={[0.46, 0.025, 0.32]} />
             <meshStandardMaterial color="#DDE3EE" roughness={0.4} metalness={0.3} />
           </mesh>
-          <group position={[0, 0.012, -0.16]} rotation={[0.3, 0, 0]}>
+          <group position={[0, 0.012, 0.16]} rotation={[0.3, 0, 0]}>
             <mesh position={[0, 0.15, 0]} castShadow>
               <boxGeometry args={[0.46, 0.3, 0.02]} />
               <meshStandardMaterial color="#C9D1E0" roughness={0.4} metalness={0.4} />
             </mesh>
-            <mesh position={[0, 0.15, 0.012]}>
+            <mesh position={[0, 0.15, 0.0115]}>
               <sphereGeometry args={[0.025, 16, 12]} />
               <meshStandardMaterial color={C.yellow} roughness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.15, -0.0105]}>
+              <boxGeometry args={[0.42, 0.26, 0.002]} />
+              <meshBasicMaterial color="#2A3A66" toneMapped={false} />
             </mesh>
           </group>
         </group>
       )}
 
-      {/* Contact: a phone, held in the hand (the hand is at about x 0.27, y 0.64) */}
-      {outfit === "contact" && (
-        <group position={[0.28, 0.69, 0.1]} rotation={[-0.25, 0, 0]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.07, 0.14, 0.012]} />
+      {/* Contact: a phone in the right hand (the hand is at about x 0.27, y 0.88, z 0.39).
+          The screen faces me; the audience sees the back, with a small camera. */}
+      {contact && (
+        <group position={[0.273, 0.93, 0.4]} rotation={[0.15, 0, 0.12]}>
+          <RoundedBox args={[0.075, 0.15, 0.012]} radius={0.01} smoothness={4} castShadow>
             <meshStandardMaterial color={C.navy} roughness={0.4} />
+          </RoundedBox>
+          <mesh position={[0, 0.055, 0.0075]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.004, 16]} />
+            <meshStandardMaterial color={C.yellow} roughness={0.4} />
           </mesh>
-          <mesh position={[0, 0, 0.007]}>
-            <boxGeometry args={[0.058, 0.122, 0.002]} />
+          <mesh position={[0, 0, -0.0065]}>
+            <boxGeometry args={[0.062, 0.128, 0.002]} />
             <meshBasicMaterial color={C.cream} toneMapped={false} />
           </mesh>
         </group>
