@@ -28,6 +28,44 @@
     "links": []
   },
   {
+    "slug": "pizza-menu",
+    "title": "Andy's Pizza Co.",
+    "category": "code",
+    "role": "Individual project · React front-end",
+    "summary": "A responsive pizza menu and ordering web app. Visitors browse the menu, add pizzas to a cart, check out with a validated form, and follow their order on a live status tracker.",
+    "tags": ["React", "JavaScript", "CSS"],
+    "featured": true,
+    "thumb": "/img/projects/pizza-menu.jpg",
+    "screens": [
+      {
+        "src": "/img/projects/pizza-menu-menu.jpg",
+        "caption": "The menu: pizzas rendered from a data array, with category filters, a Chef's pick badge and a sold-out state."
+      },
+      {
+        "src": "/img/projects/pizza-menu-checkout.jpg",
+        "caption": "Checkout: a controlled form with validation, and a choice of delivery or pickup."
+      },
+      {
+        "src": "/img/projects/pizza-menu-tracker.jpg",
+        "caption": "Order confirmation with a live status tracker."
+      }
+    ],
+    "problem": "Starting from course activities on a pizza menu rendered from a data array, extend it into a small ordering app: open and closed status, a cart, a checkout and an order tracker.",
+    "process": [
+      "Rendered the menu from a data array with reusable components and props.",
+      "Worked out the open or closed status and a live countdown with timers (useEffect, with cleanup).",
+      "Built the cart with quantity controls and a running total, updating arrays and objects in state without changing the originals.",
+      "Built the checkout as a controlled form with validation, and a delivery or pickup option.",
+      "Added an order confirmation with a live status tracker, and a demo mode so visitors can try ordering outside opening hours.",
+      "Made the layout responsive, with semantic HTML and accessible labels."
+    ],
+    "result": "A responsive React app, deployed on Vercel, where a visitor can go from the menu to a confirmed order. I learned how to lift state up and share it through props, how to update arrays and objects in state, and how to build controlled forms.",
+    "links": [
+      { "label": "Live demo", "url": "https://pizza-menu-brown-eight.vercel.app/" },
+      { "label": "Code on GitHub", "url": "https://github.com/25040104-xr/pizza-menu" }
+    ]
+  },
+  {
     "slug": "nature-network-2030",
     "title": "Nature Network 2030",
     "category": "design",
