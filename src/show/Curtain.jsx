@@ -149,7 +149,7 @@ export default function Curtain({ anim, open, reduced, onOpen }) {
   );
 
   useFrame(() => {
-    const o = 1 - ease(anim.current.curtain);
+    const o = 1 - THREE.MathUtils.smoothstep(anim.current.curtain, 0, 0.2);
     if (seam.current) seam.current.opacity = o;
     if (glow.current) glow.current.opacity = o * 0.8;
     if (pool.current) pool.current.opacity = o * 0.9;

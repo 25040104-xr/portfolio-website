@@ -1,17 +1,24 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { C } from "./palette.js";
 
 const HEIGHT = 1.95; // a model of your own is scaled to this height
 
 // How I look: brown hair to the collarbone, light-brown square glasses, a V-neck top
-const HAIR = "#563822";
+const HAIR = "#4B2E1B";
 const FRAME = "#9A6A3A";
+const SKIN = "#CFA17C";
+const SKIN_SHADE = "#BA8665"; // the skin in the V of the neckline
+const BLUSH = "#E58F85";
 const TOP_GREY = "#C9CED6";
 const TOP_NAVY = "#1B2A4C";
-const SKIN_V = "#D9AA8C"; // the skin in the V of the neckline: a little darker, because the light makes it look yellow
+
+// A thin dark line round every part: it ties the parts together into one figure (switch it off with false)
+const OUTLINES = true;
+const LINE = "#1B2540";
 
 async function exists(url) {
   try {
@@ -85,55 +92,87 @@ function makeFabric() {
   return t;
 }
 
-/* A long sleeve: it starts inside the shoulder, ends in a cuff, and the hand overlaps the cuff,
-   so that no part is only touching the next one. */
+/* The outline: a dark copy of the part that is pushed outwards a little and drawn from the inside,
+   so only a thin dark edge shows round the part. Its normals are smoothed, so it has no gaps at the edges. */
+function makeHull(t) {
+  return new THREE.ShaderMaterial({
+    uniforms: { uT: { value: t }, uColor: { value: new THREE.Color(LINE) } },
+    vertexShader:
+      "uniform float uT; void main(){ vec3 p = position + normalize(normal) * uT; gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }",
+    fragmentShader: "uniform vec3 uColor; void main(){ gl_FragColor = vec4(uColor, 1.0); }",
+    side: THREE.BackSide,
+  });
+}
+
+function Outline({ t = 0.016 }) {
+  const ref = useRef();
+  const mat = useMemo(() => makeHull(t), [t]);
+  useLayoutEffect(() => {
+    const parent = ref.current && ref.current.parent;
+    if (!parent || !parent.geometry) return undefined;
+    const g = parent.geometry.clone();
+    ["normal", "uv", "uv1"].forEach((n) => g.getAttribute(n) && g.deleteAttribute(n));
+    const merged = mergeVertices(g, 1e-4);
+    merged.computeVertexNormals();
+    ref.current.geometry = merged;
+    return () => merged.dispose();
+  }, []);
+  return <mesh ref={ref} material={mat} />;
+}
+
+/* One part of the body: a mesh with a thin dark outline */
+function Part({ children, line = 0.013, ...props }) {
+  return (
+    <mesh castShadow {...props}>
+      {children}
+      {OUTLINES && <Outline t={line} />}
+    </mesh>
+  );
+}
+
+/* A long sleeve: it starts inside the shoulder, ends in a cuff, and the hand overlaps the cuff */
 function Arm({ shirt, trim, fabric }) {
   return (
     <>
-      <mesh position={[0, -0.2, 0]} castShadow>
+      <Part position={[0, -0.2, 0]}>
         <capsuleGeometry args={[0.062, 0.26, 6, 14]} />
-        <meshStandardMaterial color={shirt} roughness={0.85} bumpMap={fabric} bumpScale={0.4} />
-      </mesh>
-      <mesh position={[0, -0.385, 0]} castShadow>
-        <cylinderGeometry args={[0.066, 0.066, 0.045, 18]} />
-        <meshStandardMaterial color={trim} roughness={0.85} />
-      </mesh>
-      <mesh position={[0, -0.44, 0]} castShadow>
-        <sphereGeometry args={[0.066, 16, 12]} />
-        <meshStandardMaterial color={C.skin} roughness={0.7} />
-      </mesh>
+        <meshStandardMaterial color={shirt} roughness={0.9} bumpMap={fabric} bumpScale={0.4} />
+      </Part>
+      <Part position={[0, -0.385, 0]} line={0.009}>
+        <cylinderGeometry args={[0.067, 0.067, 0.045, 18]} />
+        <meshStandardMaterial color={trim} roughness={0.9} />
+      </Part>
+      <Part position={[0, -0.44, 0]} line={0.009}>
+        <sphereGeometry args={[0.064, 16, 12]} />
+        <meshStandardMaterial color={SKIN} roughness={0.85} />
+      </Part>
     </>
   );
 }
 
-/* A white sneaker: the shoe, a rounded toe and a thin sole */
+/* A white sneaker: one rounded shoe on a thin sole, turned out a little */
 function Shoe({ s }) {
   return (
-    <group position={[s * 0.1, 0, 0.04]}>
-      <mesh position={[0, 0.055, 0]} castShadow>
-        <boxGeometry args={[0.14, 0.07, 0.22]} />
-        <meshStandardMaterial color={C.cream} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.058, 0.1]} scale={[1, 0.8, 1]} castShadow>
-        <sphereGeometry args={[0.07, 18, 12]} />
-        <meshStandardMaterial color={C.cream} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.0125, 0.01]} castShadow>
-        <boxGeometry args={[0.15, 0.025, 0.26]} />
-        <meshStandardMaterial color="#BFC5D0" roughness={0.7} />
-      </mesh>
+    <group position={[s * 0.105, 0, 0.06]} rotation={[0, s * 0.12, 0]}>
+      <RoundedBox args={[0.15, 0.1, 0.28]} radius={0.04} smoothness={4} position={[0, 0.066, 0]} castShadow>
+        <meshStandardMaterial color={C.cream} roughness={0.7} />
+        {OUTLINES && <Outline t={0.01} />}
+      </RoundedBox>
+      <RoundedBox args={[0.156, 0.03, 0.286]} radius={0.012} smoothness={3} position={[0, 0.015, 0]} castShadow>
+        <meshStandardMaterial color="#B9C0CC" roughness={0.8} />
+      </RoundedBox>
     </group>
   );
 }
 
-/* Square glasses with light-brown frames */
+/* Square glasses with light-brown frames, sitting close to the face, with arms that reach the ears */
 function Glasses() {
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: FRAME, roughness: 0.5 }), []);
   const W = 0.18;
   const H = 0.13;
-  const T = 0.014;
+  const T = 0.016;
   return (
-    <group position={[0, 0.01, 0.352]}>
+    <group position={[0, 0.02, 0.322]}>
       {[-1, 1].map((s) => (
         <group key={s} position={[s * 0.125, 0, 0]}>
           <mesh position={[0, H / 2, 0]} material={mat}>
@@ -151,13 +190,13 @@ function Glasses() {
         </group>
       ))}
       {/* the bridge */}
-      <mesh position={[0, H / 2 - 0.02, 0]} material={mat}>
-        <boxGeometry args={[0.06, T, T]} />
+      <mesh position={[0, H / 2 - 0.025, 0]} material={mat}>
+        <boxGeometry args={[0.07, T, T]} />
       </mesh>
-      {/* the arms that go back to the ears */}
+      {/* the arms: from the outer corner of each lens back to the ear */}
       {[-1, 1].map((s) => (
-        <mesh key={`arm${s}`} position={[s * 0.275, H / 2 - 0.02, -0.12]} rotation={[0, s * -0.432, 0]} material={mat}>
-          <boxGeometry args={[T, T, 0.286]} />
+        <mesh key={`arm${s}`} position={[s * 0.275, H / 2 - 0.02, -0.139]} rotation={[0, s * -0.416, 0]} material={mat}>
+          <boxGeometry args={[T, T, 0.3]} />
         </mesh>
       ))}
     </group>
@@ -186,17 +225,17 @@ function Strap({ a, b, color }) {
 function Lanyard() {
   return (
     <group>
-      <mesh position={[0, 1.135, 0.005]} rotation={[Math.PI / 2 - 0.25, 0, 0]}>
-        <torusGeometry args={[0.1, 0.009, 8, 36]} />
+      <mesh position={[0, 1.15, 0.005]} rotation={[Math.PI / 2 - 0.25, 0, 0]}>
+        <torusGeometry args={[0.105, 0.009, 8, 36]} />
         <meshStandardMaterial color={C.yellow} roughness={0.6} />
       </mesh>
       {[-1, 1].map((s) => (
         <group key={s}>
-          <Strap a={[s * 0.075, 1.11, 0.1]} b={[s * 0.05, 1.045, 0.2]} color={C.yellow} />
-          <Strap a={[s * 0.05, 1.045, 0.2]} b={[0, 0.958, 0.212]} color={C.yellow} />
+          <Strap a={[s * 0.085, 1.13, 0.1]} b={[s * 0.055, 1.05, 0.2]} color={C.yellow} />
+          <Strap a={[s * 0.055, 1.05, 0.2]} b={[0, 0.93, 0.214]} color={C.yellow} />
         </group>
       ))}
-      <group position={[0, 0.958, 0.212]} rotation={[-0.1, 0, 0]}>
+      <group position={[0, 0.93, 0.214]} rotation={[-0.1, 0, 0]}>
         <mesh position={[0, -0.012, 0.004]}>
           <boxGeometry args={[0.03, 0.03, 0.014]} />
           <meshStandardMaterial color="#B8BFCC" metalness={0.7} roughness={0.35} />
@@ -213,9 +252,9 @@ function Lanyard() {
   );
 }
 
-/* A toy-like figure built from simple shapes, dressed in clothes that look like clothes:
-   a V-neck top with a trimmed neckline, long sleeves with cuffs, a hem, trousers and sneakers.
-   Every part overlaps the next one, so the body does not fall apart. */
+/* A toy-like figure built from simple shapes, dressed in clothes that look like clothes.
+   The top is one straight piece that ends in a hem, and the trousers are two legs that come out
+   from under it, so it does not look like a skirt. Every part overlaps the next one. */
 function ToyDoll({ outfit, anim }) {
   const root = useRef();
   const head = useRef();
@@ -225,7 +264,7 @@ function ToyDoll({ outfit, anim }) {
   const contact = outfit === "contact";
   const shirt = work ? TOP_NAVY : TOP_GREY;
   const trim = work ? "#111A30" : "#A5ACB9"; // a darker shade of the top: the neckline, hem and cuffs
-  const trousers = work ? "#262B36" : C.navy;
+  const trousers = work ? "#2B303B" : C.navy;
   const fabric = useMemo(makeFabric, []);
 
   // In Work both arms come forward and hold the laptop; in Contact the right arm holds the phone
@@ -234,9 +273,9 @@ function ToyDoll({ outfit, anim }) {
 
   const vShape = useMemo(() => {
     const s = new THREE.Shape();
-    s.moveTo(-0.1, 0);
-    s.lineTo(0.1, 0);
-    s.lineTo(0, -0.16);
+    s.moveTo(-0.075, 0);
+    s.lineTo(0.075, 0);
+    s.lineTo(0, -0.13);
     s.closePath();
     return s;
   }, []);
@@ -259,62 +298,61 @@ function ToyDoll({ outfit, anim }) {
 
   return (
     <group ref={root}>
-      {/* sneakers, and trousers that go up into the hips */}
+      {/* sneakers, and trousers: two legs, wide at the top, that go up under the hem of the top */}
       {[-1, 1].map((s) => (
         <Shoe key={`shoe${s}`} s={s} />
       ))}
       {[-1, 1].map((s) => (
-        <mesh key={`leg${s}`} position={[s * 0.1, 0.32, 0]} castShadow>
-          <cylinderGeometry args={[0.092, 0.072, 0.5, 20]} />
-          <meshStandardMaterial color={trousers} roughness={0.85} bumpMap={fabric} bumpScale={0.4} />
-        </mesh>
+        <Part key={`leg${s}`} position={[s * 0.105, 0.35, 0]}>
+          <cylinderGeometry args={[0.108, 0.074, 0.6, 24]} />
+          <meshStandardMaterial color={trousers} roughness={0.9} bumpMap={fabric} bumpScale={0.4} />
+        </Part>
       ))}
-      {/* the hips narrow down into the legs, so the trousers are one piece of clothing, not a skirt */}
-      <mesh position={[0, 0.62, 0]} castShadow>
-        <cylinderGeometry args={[0.205, 0.188, 0.3, 28]} />
-        <meshStandardMaterial color={trousers} roughness={0.85} bumpMap={fabric} bumpScale={0.4} />
-      </mesh>
 
-      {/* the top, and its hem where it meets the trousers */}
-      <mesh position={[0, 0.84, 0]} castShadow>
-        <capsuleGeometry args={[0.2, 0.28, 8, 24]} />
-        <meshStandardMaterial color={shirt} roughness={0.85} bumpMap={fabric} bumpScale={0.4} />
-      </mesh>
-      <mesh position={[0, 0.75, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.206, 0.011, 8, 32]} />
-        <meshStandardMaterial color={trim} roughness={0.85} />
+      {/* the top: a straight piece with a rounded shoulder line, and its hem */}
+      <Part position={[0, 0.87, 0]}>
+        <cylinderGeometry args={[0.19, 0.206, 0.5, 32]} />
+        <meshStandardMaterial color={shirt} roughness={0.9} bumpMap={fabric} bumpScale={0.4} />
+      </Part>
+      <Part position={[0, 1.12, 0]} scale={[1, 0.55, 0.86]}>
+        <sphereGeometry args={[0.2, 32, 18]} />
+        <meshStandardMaterial color={shirt} roughness={0.9} bumpMap={fabric} bumpScale={0.4} />
+      </Part>
+      <mesh position={[0, 0.625, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.206, 0.012, 8, 36]} />
+        <meshStandardMaterial color={trim} roughness={0.9} />
       </mesh>
 
       {/* the neck joins the head to the body */}
-      <mesh position={[0, 1.17, 0]} castShadow>
-        <cylinderGeometry args={[0.085, 0.095, 0.2, 20]} />
-        <meshStandardMaterial color={C.skin} roughness={0.7} />
-      </mesh>
+      <Part position={[0, 1.2, 0]} line={0.009}>
+        <cylinderGeometry args={[0.075, 0.085, 0.2, 20]} />
+        <meshStandardMaterial color={SKIN} roughness={0.85} />
+      </Part>
 
-      {/* the V-neck, with a trim along both edges */}
-      <mesh position={[0, 1.1, 0.192]}>
+      {/* the V-neck: a small V of skin, with a trim along both edges */}
+      <mesh position={[0, 1.15, 0.2]}>
         <shapeGeometry args={[vShape]} />
-        <meshStandardMaterial color={SKIN_V} roughness={0.9} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={SKIN_SHADE} roughness={0.95} side={THREE.DoubleSide} />
       </mesh>
       {[-1, 1].map((s) => (
-        <mesh key={`vtrim${s}`} position={[s * 0.05, 1.02, 0.198]} rotation={[0, 0, -s * 0.5586]}>
-          <boxGeometry args={[0.014, 0.1887, 0.012]} />
-          <meshStandardMaterial color={trim} roughness={0.85} />
+        <mesh key={`vtrim${s}`} position={[s * 0.0375, 1.085, 0.205]} rotation={[0, 0, -s * 0.5247]}>
+          <boxGeometry args={[0.013, 0.15, 0.01]} />
+          <meshStandardMaterial color={trim} roughness={0.9} />
         </mesh>
       ))}
 
-      {/* the shoulders are balls, so the sleeves grow out of the body */}
+      {/* the shoulders are small balls, so the sleeves grow out of the body */}
       {[-1, 1].map((s) => (
-        <mesh key={`shoulder${s}`} position={[s * 0.2, 1.08, 0]} castShadow>
-          <sphereGeometry args={[0.088, 18, 14]} />
-          <meshStandardMaterial color={shirt} roughness={0.85} bumpMap={fabric} bumpScale={0.4} />
-        </mesh>
+        <Part key={`shoulder${s}`} position={[s * 0.2, 1.09, 0]} line={0.009}>
+          <sphereGeometry args={[0.07, 18, 14]} />
+          <meshStandardMaterial color={shirt} roughness={0.9} bumpMap={fabric} bumpScale={0.4} />
+        </Part>
       ))}
 
-      <group position={[-0.22, 1.08, 0]} rotation={[armL, 0, -0.12]}>
+      <group position={[-0.215, 1.09, 0]} rotation={[armL, 0, -0.12]}>
         <Arm shirt={shirt} trim={trim} fabric={fabric} />
       </group>
-      <group ref={armWave} position={[0.22, 1.08, 0]} rotation={[armR, 0, 0.12]}>
+      <group ref={armWave} position={[0.215, 1.09, 0]} rotation={[armR, 0, 0.12]}>
         <Arm shirt={shirt} trim={trim} fabric={fabric} />
       </group>
 
@@ -346,19 +384,20 @@ function ToyDoll({ outfit, anim }) {
         </group>
       )}
 
-      {/* Contact: a phone in the right hand (the hand is at about x 0.27, y 0.88, z 0.39).
-          The screen faces me; the audience sees the back, with a small camera. */}
+      {/* Contact: a phone held up in the right hand: the hand holds its lower end (the hand is at about
+          x 0.27, y 0.89, z 0.39). The screen faces me; the audience sees the back, with a small camera. */}
       {contact && (
-        <group position={[0.273, 0.93, 0.4]} rotation={[0.15, 0, 0.12]}>
-          <RoundedBox args={[0.075, 0.15, 0.012]} radius={0.01} smoothness={4} castShadow>
+        <group position={[0.27, 1.0, 0.405]} rotation={[0.12, 0, 0.1]}>
+          <RoundedBox args={[0.105, 0.21, 0.014]} radius={0.014} smoothness={4} castShadow>
             <meshStandardMaterial color={C.navy} roughness={0.4} />
+            <Outline t={0.008} />
           </RoundedBox>
-          <mesh position={[0, 0.055, 0.0075]}>
-            <cylinderGeometry args={[0.012, 0.012, 0.004, 16]} />
+          <mesh position={[-0.026, 0.075, 0.0085]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.016, 0.016, 0.005, 18]} />
             <meshStandardMaterial color={C.yellow} roughness={0.4} />
           </mesh>
-          <mesh position={[0, 0, -0.0065]}>
-            <boxGeometry args={[0.062, 0.128, 0.002]} />
+          <mesh position={[0, 0, -0.0075]}>
+            <boxGeometry args={[0.088, 0.18, 0.002]} />
             <meshBasicMaterial color={C.cream} toneMapped={false} />
           </mesh>
         </group>
@@ -366,25 +405,26 @@ function ToyDoll({ outfit, anim }) {
 
       {/* the head: large, like a toy. It sits low enough to overlap the neck. */}
       <group ref={head} position={[0, 1.47, 0]}>
-        <mesh castShadow>
-          <sphereGeometry args={[0.34, 40, 28]} />
-          <meshStandardMaterial color={C.skin} roughness={0.7} />
-        </mesh>
+        <Part>
+          <sphereGeometry args={[0.34, 48, 32]} />
+          <meshStandardMaterial color={SKIN} roughness={0.85} />
+        </Part>
 
-        {/* the hair: a cap tilted back so the hairline is above the eyes, the long hair behind, and a lock on each side */}
-        <mesh rotation={[-0.5, 0, 0]} castShadow>
-          <sphereGeometry args={[0.352, 40, 24, 0, Math.PI * 2, 0, Math.PI * 0.52]} />
-          <meshStandardMaterial color={HAIR} roughness={0.8} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[0, -0.1, -0.12]} scale={[1, 1.15, 0.65]} castShadow>
-          <sphereGeometry args={[0.31, 32, 24]} />
-          <meshStandardMaterial color={HAIR} roughness={0.8} />
-        </mesh>
+        {/* the hair: a cap tilted back so the hairline is above the eyes, the long hair behind,
+            and a lock on each side that reaches up into the cap, so nothing floats */}
+        <Part rotation={[-0.5, 0, 0]} line={0.013}>
+          <sphereGeometry args={[0.355, 40, 24, 0, Math.PI * 2, 0, Math.PI * 0.53]} />
+          <meshStandardMaterial color={HAIR} roughness={0.85} side={THREE.DoubleSide} />
+        </Part>
+        <Part position={[0, -0.14, -0.1]} scale={[1, 1.25, 0.72]} line={0.013}>
+          <sphereGeometry args={[0.32, 32, 24]} />
+          <meshStandardMaterial color={HAIR} roughness={0.85} />
+        </Part>
         {[-1, 1].map((s) => (
-          <mesh key={`lock${s}`} position={[s * 0.3, -0.2, 0.02]} rotation={[0, 0, s * 0.06]} castShadow>
-            <capsuleGeometry args={[0.07, 0.3, 6, 12]} />
-            <meshStandardMaterial color={HAIR} roughness={0.8} />
-          </mesh>
+          <Part key={`lock${s}`} position={[s * 0.285, -0.1, 0.0]} rotation={[0, 0, s * 0.05]} line={0.013}>
+            <capsuleGeometry args={[0.075, 0.3, 6, 12]} />
+            <meshStandardMaterial color={HAIR} roughness={0.85} />
+          </Part>
         ))}
 
         <group ref={eyes} position={[0, 0.02, 0]}>
@@ -395,6 +435,14 @@ function ToyDoll({ outfit, anim }) {
             </mesh>
           ))}
         </group>
+
+        {/* a little blush, and a smile */}
+        {[-1, 1].map((s) => (
+          <mesh key={`blush${s}`} position={[s * 0.19, -0.075, 0.272]} rotation={[0, s * 0.58, 0]}>
+            <circleGeometry args={[0.045, 20]} />
+            <meshBasicMaterial color={BLUSH} transparent opacity={0.5} toneMapped={false} />
+          </mesh>
+        ))}
         <mesh position={[0, -0.11, 0.322]} rotation={[0, 0, Math.PI]}>
           <torusGeometry args={[0.055, 0.009, 8, 20, Math.PI]} />
           <meshStandardMaterial color={C.navy} roughness={0.5} />
